@@ -1,0 +1,183 @@
+<?php
+
+namespace EXSyst\Component\Worker;
+
+use Symfony\Component\Process\PhpExecutableFinder;
+
+use EXSyst\Component\IO\Source;
+use EXSyst\Component\IO\Source\BufferedSource;
+
+use EXSyst\Component\IO\Channel\ChannelInterface;
+use EXSyst\Component\IO\Channel\SerializedChannel;
+
+use EXSyst\Component\Worker\Bootstrap\WorkerBootstrapProfile;
+
+use EXSyst\Component\Worker\Exception;
+
+use EXSyst\Component\Worker\Internal\StopMessage;
+use EXSyst\Component\Worker\Internal\WorkerRunner;
+
+class SharedWorker implements ChannelInterface
+{
+    private $channel;
+    private $stopCookie;
+
+    protected function __construct($socketAddress, WorkerBootstrapProfile $bootstrapProfile = null, $implementationExpression = null)
+    {
+        $this->stopCookie = $bootstrapProfile->getStopCookie();
+        try {
+            $this->channel = static::connect($socketAddress, $bootstrapProfile);
+        } catch (Exception\RuntimeException $e) {
+            static::startWithExpression($socketAddress, $bootstrapProfile, $implementationExpression, true);
+            // Try every 0.2s for 10s
+            for ($i = 0; $i < 50; ++$i) {
+                try {
+                    // If we get here, the timeout should be useless, but, just in case ...
+                    $this->channel = static::connect($socketAddress, $bootstrapProfile, 1);
+                    break;
+                } catch (Exception\RuntimeException $e2) { }
+                usleep(200000);
+            }
+            if (!$this->channel) {
+                // Final attempt
+                $this->channel = static::connect($socketAddress, $bootstrapProfile);
+            }
+        }
+    }
+
+    private static function connect($socketAddress, WorkerBootstrapProfile $bootstrapProfile, $timeout = null)
+    {
+        $socket = WorkerRunner::createClientSocket($socketAddress, $errno, $errstr, $timeout);
+        if ($socket === false) {
+            throw new Exception\RuntimeException("Can't create client socket : " . $errstr, $errno);
+        }
+        $connection = Source::fromStream($socket, true, null, false);
+        return $bootstrapProfile->getChannelFactory()->createChannel(new BufferedSource($connection), $connection);
+    }
+
+    public static function withClass(WorkerBootstrapProfile $bootstrapProfile, $implementationClassName)
+    {
+        return new static($bootstrapProfile, $bootstrapProfile->generateExpression($implementationClassName));
+    }
+
+    public static function withExpression(WorkerBootstrapProfile $bootstrapProfile, $implementationExpression)
+    {
+        return new static($bootstrapProfile, $implementationExpression);
+    }
+
+    public static function startWithClass($socketAddress, WorkerBootstrapProfile $bootstrapProfile, $implementationClassName)
+    {
+        static::startWithExpression($socketAddress, $bootstrapProfile, $bootstrapProfile->generateExpression($implementationClassName));
+    }
+
+    public static function startWithExpression($socketAddress, WorkerBootstrapProfile $bootstrapProfile, $implementationExpression, $auto = false)
+    {
+        if (!self::isLocalAddress($socketAddress)) {
+            if ($auto) {
+                throw new Exception\RuntimeException("Can't create client socket, and can't start the worker, because its socket address is not local");
+            } else {
+                throw new Exception\LogicException("Can't start the worker, because its socket address is not local");
+            }
+        }
+
+        $php = $bootstrapProfile->getPhpExecutablePath();
+        $phpArgs = $bootstrapProfile->getPhpArguments();
+        if ($php === null || $phpArgs === null) {
+            $executableFinder = new PhpExecutableFinder();
+            if ($php === null) {
+                $php = $executableFinder->find(false);
+                if ($php === false) {
+                    throw new Exception\RuntimeException('Unable to find the PHP executable.');
+                }
+            }
+            if ($phpArgs === null) {
+                $phpArgs = $executableFinder->findArguments();
+            }
+        }
+
+        $scriptPath = $bootstrapProfile->getPrecompiledScriptWithExpression($implementationExpression, $socketAddress);
+        if ($scriptPath === null) {
+            $deleteScript = true;
+            $scriptPath = tempnam(sys_get_temp_dir(), 'xsW');
+            file_put_contents($scriptPath, $bootstrapProfile->generateScriptWithExpression($implementationExpression, $socketAddress));
+        } else {
+            $deleteScript = false;
+            if (!file_exists($scriptPath)) {
+                file_put_contents($scriptPath, $bootstrapProfile->generateScriptWithExpression($implementationExpression, $socketAddress));
+            }
+        }
+
+        try {
+            $line = array_merge([ $php ], $phpArgs, [ $scriptPath ]);
+            system(implode(' ', array_map('escapeshellarg', $line)) . ' &');
+        } catch (\Exception $e) {
+            if ($deleteScript) {
+                unlink($scriptPath);
+            }
+            throw $e;
+        }
+    }
+
+    public static function stop($socketAddress, WorkerBootstrapProfile $bootstrapProfile)
+    {
+        $stopCookie = $bootstrapProfile->getStopCookie();
+        if ($stopCookie === null) {
+            throw new Exception\LogicException('Cannot stop a shared worker without a stop cookie');
+        }
+        static::sendStopMessage(static::connect($socketAddress, $bootstrapProfile)->sendMessage(), $stopCookie);
+    }
+
+    public static function stopCurrent()
+    {
+        WorkerRunner::stopListening();
+    }
+
+    public static function isLocalAddress($socketAddress)
+    {
+        if (substr_compare($socketAddress, "unix://", 0, 7) === 0) {
+            return true;
+        }
+        $localAddresses = array_merge([
+            '0.0.0.0',
+            '127.0.0.1',
+            '[::]',
+            '[::1]'
+        ], gethostbynamel(gethostname()));
+        foreach ($localAddresses as $address) {
+            if (strpos($socketAddress, $address) !== false) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static function sendStopMessage(ChannelInterface $channel, $stopCookie)
+    {
+        $channel->sendMessage(($channel instanceof SerializedChannel) ? new StopMessage($stopCookie) : [ '_stop_' => $stopCookie ]);
+    }
+
+    public function stop()
+    {
+        static::sendStopMessage($this->channel, $this->stopCookie);
+        return $this;
+    }
+
+    /** {@inheritdoc} */
+    public function getStream()
+    {
+        return $this->channel->getStream();
+    }
+
+    /** {@inheritdoc} */
+    public function sendMessage($message)
+    {
+        $this->channel->sendMessage($message);
+        return $this;
+    }
+
+    /** {@inheritdoc} */
+    public function receiveMessage()
+    {
+        return $this->channel->receiveMessage();
+    }
+}
