@@ -37,13 +37,14 @@ final class AutoloaderFinder
                 self::$autoloader = null;
             } while (false);
         }
+
         return self::$autoloader;
     }
 
     private static function push($directory, $partToAdd)
     {
         if ($directory !== null) {
-            return $directory . DIRECTORY_SEPARATOR . $partToAdd;
+            return $directory.DIRECTORY_SEPARATOR.$partToAdd;
         }
     }
 

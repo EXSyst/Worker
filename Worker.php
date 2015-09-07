@@ -4,13 +4,8 @@ namespace EXSyst\Component\Worker;
 
 use EXSyst\Component\IO\Source;
 use EXSyst\Component\IO\Sink;
-
 use EXSyst\Component\IO\Channel\ChannelInterface;
-
 use EXSyst\Component\Worker\Bootstrap\WorkerBootstrapProfile;
-
-use EXSyst\Component\Worker\Exception;
-
 class Worker implements ChannelInterface
 {
     private $process;
@@ -22,20 +17,22 @@ class Worker implements ChannelInterface
         $bootstrapProfile->compileScriptWithExpression($implementationExpression, null, $scriptPath, $deleteScript);
 
         try {
-            $line = array_merge([ $php ], $phpArgs, [ $scriptPath ]);
+            $line = array_merge([$php], $phpArgs, [$scriptPath]);
             $this->process = proc_open(implode(' ', array_map('escapeshellarg', $line)), [
-                0 => [ 'pipe', 'r' ],
-                1 => [ 'pipe', 'w' ],
-                2 => STDERR
+                0 => ['pipe', 'r'],
+                1 => ['pipe', 'w'],
+                2 => STDERR,
             ], $pipes);
             $inputSink = Sink::fromStream($pipes[0], true);
             $outputSource = Source::fromStream($pipes[1], true);
             $this->channel = $bootstrapProfile->getChannelFactory()->createChannel($outputSource, $inputSink);
         } catch (\Exception $e) {
-            if (isset($pipes[1]))
+            if (isset($pipes[1])) {
                 fclose($pipes[1]);
-            if (isset($pipes[0]))
+            }
+            if (isset($pipes[0])) {
                 fclose($pipes[0]);
+            }
             if (isset($this->process)) {
                 proc_terminate($this->process);
                 proc_close($this->process);
@@ -73,6 +70,7 @@ class Worker implements ChannelInterface
     public function sendMessage($message)
     {
         $this->channel->sendMessage($message);
+
         return $this;
     }
 

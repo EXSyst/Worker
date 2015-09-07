@@ -3,7 +3,6 @@
 namespace EXSyst\Component\Worker;
 
 use EXSyst\Component\IO\Channel\ChannelInterface;
-
 use React\EventLoop\LoopInterface;
 
 interface EventedWorkerImplementationInterface

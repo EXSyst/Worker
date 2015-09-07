@@ -4,14 +4,9 @@ namespace EXSyst\Component\Worker;
 
 use EXSyst\Component\IO\Source;
 use EXSyst\Component\IO\Source\BufferedSource;
-
 use EXSyst\Component\IO\Channel\ChannelInterface;
 use EXSyst\Component\IO\Channel\SerializedChannel;
-
 use EXSyst\Component\Worker\Bootstrap\WorkerBootstrapProfile;
-
-use EXSyst\Component\Worker\Exception;
-
 use EXSyst\Component\Worker\Internal\StopMessage;
 use EXSyst\Component\Worker\Internal\WorkerRunner;
 
@@ -49,9 +44,10 @@ class SharedWorker implements ChannelInterface
     {
         $socket = WorkerRunner::createClientSocket($socketAddress, $errno, $errstr, $timeout);
         if ($socket === false) {
-            throw new Exception\RuntimeException("Can't create client socket : " . $errstr, $errno);
+            throw new Exception\RuntimeException("Can't create client socket : ".$errstr, $errno);
         }
         $connection = Source::fromStream($socket, true, null, false);
+
         return $bootstrapProfile->getChannelFactory()->createChannel(new BufferedSource($connection), $connection);
     }
 
@@ -84,8 +80,8 @@ class SharedWorker implements ChannelInterface
         $bootstrapProfile->compileScriptWithExpression($implementationExpression, $socketAddress, $scriptPath, $deleteScript);
 
         try {
-            $line = array_merge([ $php ], $phpArgs, [ $scriptPath ]);
-            system(implode(' ', array_map('escapeshellarg', $line)) . ' &');
+            $line = array_merge([$php], $phpArgs, [$scriptPath]);
+            system(implode(' ', array_map('escapeshellarg', $line)).' &');
         } catch (\Exception $e) {
             if ($deleteScript) {
                 unlink($scriptPath);
@@ -110,31 +106,33 @@ class SharedWorker implements ChannelInterface
 
     public static function isLocalAddress($socketAddress)
     {
-        if (substr_compare($socketAddress, "unix://", 0, 7) === 0) {
+        if (substr_compare($socketAddress, 'unix://', 0, 7) === 0) {
             return true;
         }
         $localAddresses = array_merge([
             '0.0.0.0',
             '127.0.0.1',
             '[::]',
-            '[::1]'
+            '[::1]',
         ], gethostbynamel(gethostname()));
         foreach ($localAddresses as $address) {
             if (strpos($socketAddress, $address) !== false) {
                 return true;
             }
         }
+
         return false;
     }
 
     private static function sendStopMessage(ChannelInterface $channel, $stopCookie)
     {
-        $channel->sendMessage(($channel instanceof SerializedChannel) ? new StopMessage($stopCookie) : [ '_stop_' => $stopCookie ]);
+        $channel->sendMessage(($channel instanceof SerializedChannel) ? new StopMessage($stopCookie) : ['_stop_' => $stopCookie]);
     }
 
     public function stop()
     {
         self::sendStopMessage($this->channel, $this->stopCookie);
+
         return $this;
     }
 
@@ -148,6 +146,7 @@ class SharedWorker implements ChannelInterface
     public function sendMessage($message)
     {
         $this->channel->sendMessage($message);
+
         return $this;
     }
 
