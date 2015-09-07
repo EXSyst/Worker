@@ -6,6 +6,7 @@ use EXSyst\Component\IO\Source;
 use EXSyst\Component\IO\Sink;
 use EXSyst\Component\IO\Channel\ChannelInterface;
 use EXSyst\Component\Worker\Bootstrap\WorkerBootstrapProfile;
+
 class Worker implements ChannelInterface
 {
     private $process;
