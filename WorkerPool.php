@@ -69,7 +69,7 @@ class WorkerPool implements ArrayAccess, Countable, IteratorAggregate
     public function receiveMessage(&$worker)
     {
         $workers = $this->workers;
-        Selectable::selectRead($workers);
+        Selectable::selectRead($workers, null);
         if (!count($workers)) {
             throw new Exception\RuntimeException("selectRead returned an empty array (this should not happen)");
         }

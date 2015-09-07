@@ -20,25 +20,25 @@ class SharedWorker implements ChannelInterface
     private $channel;
     private $stopCookie;
 
-    protected function __construct($socketAddress, WorkerBootstrapProfile $bootstrapProfile = null, $implementationExpression = null)
+    protected function __construct($socketAddress, WorkerBootstrapProfile $bootstrapProfile, $implementationExpression = null)
     {
         $this->stopCookie = $bootstrapProfile->getStopCookie();
         try {
-            $this->channel = static::connect($socketAddress, $bootstrapProfile);
+            $this->channel = self::connect($socketAddress, $bootstrapProfile);
         } catch (Exception\RuntimeException $e) {
             static::startWithExpression($socketAddress, $bootstrapProfile, $implementationExpression, true);
             // Try every 0.2s for 10s
             for ($i = 0; $i < 50; ++$i) {
                 try {
                     // If we get here, the timeout should be useless, but, just in case ...
-                    $this->channel = static::connect($socketAddress, $bootstrapProfile, 1);
+                    $this->channel = self::connect($socketAddress, $bootstrapProfile, 1);
                     break;
                 } catch (Exception\RuntimeException $e2) { }
                 usleep(200000);
             }
             if (!$this->channel) {
                 // Final attempt
-                $this->channel = static::connect($socketAddress, $bootstrapProfile);
+                $this->channel = self::connect($socketAddress, $bootstrapProfile);
             }
         }
     }
@@ -98,7 +98,7 @@ class SharedWorker implements ChannelInterface
         if ($stopCookie === null) {
             throw new Exception\LogicException('Cannot stop a shared worker without a stop cookie');
         }
-        static::sendStopMessage(static::connect($socketAddress, $bootstrapProfile)->sendMessage(), $stopCookie);
+        self::sendStopMessage(self::connect($socketAddress, $bootstrapProfile)->sendMessage(), $stopCookie);
     }
 
     public static function stopCurrent()
@@ -132,7 +132,7 @@ class SharedWorker implements ChannelInterface
 
     public function stop()
     {
-        static::sendStopMessage($this->channel, $this->stopCookie);
+        self::sendStopMessage($this->channel, $this->stopCookie);
         return $this;
     }
 

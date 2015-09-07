@@ -1,6 +1,6 @@
 <?php
 
-namespace EXSyst\Component\Worker;
+namespace EXSyst\Component\Worker\Bootstrap;
 
 use Symfony\Component\Process\PhpExecutableFinder;
 
@@ -355,15 +355,15 @@ class WorkerBootstrapProfile
 
     public function compileScriptWithExpression($expression, $socketAddress, &$scriptPath, &$mustDeleteScriptOnError)
     {
-        $scriptPath = $bootstrapProfile->getPrecompiledScriptWithExpression($implementationExpression, $socketAddress);
+        $scriptPath = $this->getPrecompiledScriptWithExpression($implementationExpression, $socketAddress);
         if ($scriptPath === null) {
             $mustDeleteScriptOnError = true;
             $scriptPath = tempnam(sys_get_temp_dir(), 'xsW');
-            file_put_contents($scriptPath, $bootstrapProfile->generateScriptWithExpression($implementationExpression, $socketAddress));
+            file_put_contents($scriptPath, $this->generateScriptWithExpression($implementationExpression, $socketAddress));
         } else {
             $mustDeleteScriptOnError = false;
             if (!file_exists($scriptPath)) {
-                file_put_contents($scriptPath, $bootstrapProfile->generateScriptWithExpression($implementationExpression, $socketAddress));
+                file_put_contents($scriptPath, $this->generateScriptWithExpression($implementationExpression, $socketAddress));
             }
         }
         return $this;
