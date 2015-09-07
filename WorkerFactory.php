@@ -8,9 +8,9 @@ class WorkerFactory
 {
     private $bootstrapProfile;
 
-    public function __construct(WorkerBootstrapProfile $bootstrapProfile)
+    public function __construct(WorkerBootstrapProfile $bootstrapProfile = null)
     {
-        $this->bootstrapProfile = $bootstrapProfile;
+        $this->bootstrapProfile = isset($bootstrapProfile) ? $bootstrapProfile : new WorkerBootstrapProfile();
     }
 
     public function getBootstrapProfile()

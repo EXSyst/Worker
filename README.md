@@ -12,8 +12,7 @@ Here is a minimal example of a dedicated worker. ```use```s and ```require```s a
 ### ```Master.php```
 ```php
 <?php
-$wbsp = new WorkerBootstrapProfile();
-$wf = new WorkerFactory($wbsp);
+$wf = new WorkerFactory();
 $w = $wf->createWorker(MyWorkerImpl::class);
 for ($i = 0; $i < 10; ++$i) {
   $w->sendMessage($i);
@@ -68,8 +67,7 @@ Here is a minimal example of a dedicated worker pool. As in the previous example
 ### ```MasterWithPool.php```
 ```php
 <?php
-$wbsp = new WorkerBootstrapProfile();
-$wf = new WorkerFactory($wbsp);
+$wf = new WorkerFactory();
 $wp = $wf->createWorkerPool(MyWorkerImpl::class, 4);
 $i = 0;
 $busy = 0;
@@ -187,3 +185,5 @@ This object contains all the parameters needed to initialize a worker. The libra
 - The socket context expression which will be evaluated by the worker, after "stage 3" (by default, none, which will make the shared workers' server sockets be created without contexts) ;
 - The "stop cookie", which is a pre-shared secret string that must be sent to a shared worker as part of an appropriate message to make it gracefully stop (by default, none, which makes it impossible to gracefully stop a shared worker using this mechanism) ;
 - The precompiled script map, which allows reusing the same script for every worker which uses the same implementation, instead of using a "generate in ```/tmp```, run once, then delete" approach (by default, none).
+
+If you don't specify a bootstrap profile when creating your worker factory, it will automatically create one, with the default values of all parameters.
