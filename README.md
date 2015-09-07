@@ -1,5 +1,5 @@
-[![Build Status](https://scrutinizer-ci.com/g/EXSyst/Worker/badges/build.png?b=master)](https://scrutinizer-ci.com/g/EXSyst/Worker/build-status/master)
 [![Build Status](https://travis-ci.org/EXSyst/Worker.svg?branch=master)](https://travis-ci.org/EXSyst/Worker)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/EXSyst/Worker/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/EXSyst/Worker/?branch=master)
 
 # EXSyst Worker Component
 Worker subprocess management
