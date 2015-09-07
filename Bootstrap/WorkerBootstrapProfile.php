@@ -323,9 +323,7 @@ class WorkerBootstrapProfile
 
     public function addPrecompiledScriptWithExpression($expression, $scriptPath, $socketAddress = null)
     {
-        if ($socketAddress !== null) {
-            $expression .= '/*' . $socketAddress . '*/';
-        }
+        $expression = self::combineExpressionWithSocketAddress($expression, $socketAddress);
         $this->precompiledScripts[$expression] = $scriptPath;
         return $this;
     }
@@ -342,9 +340,7 @@ class WorkerBootstrapProfile
 
     public function getPrecompiledScriptWithExpression($expression, $socketAddress = null)
     {
-        if ($socketAddress !== null) {
-            $expression .= '/*' . $socketAddress . '*/';
-        }
+        $expression = self::combineExpressionWithSocketAddress($expression, $socketAddress);
         return isset($this->precompiledScripts[$expression]) ? $this->precompiledScripts[$expression] : null;
     }
 
@@ -372,6 +368,15 @@ class WorkerBootstrapProfile
     public function generateExpression($className)
     {
         return 'new ' . $className . '(' . implode(', ', $this->constructorArguments) . ')';
+    }
+
+    public static function combineExpressionWithSocketAddress($expression, $socketAddress = null)
+    {
+        if ($socketAddress !== null) {
+            $expression .= '/*' . $socketAddress . '*/';
+        }
+
+        return $expression;
     }
 
     public function generateScript($className, $socketAddress = null)
