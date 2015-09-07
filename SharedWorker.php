@@ -33,7 +33,9 @@ class SharedWorker implements ChannelInterface
                     // If we get here, the timeout should be useless, but, just in case ...
                     $this->channel = self::connect($socketAddress, $bootstrapProfile, 1);
                     break;
-                } catch (Exception\RuntimeException $e2) { }
+                } catch (Exception\RuntimeException $e2) {
+                    // The worker may still be initializing, so wait, and try again
+                }
                 usleep(200000);
             }
             if (!$this->channel) {
@@ -53,14 +55,14 @@ class SharedWorker implements ChannelInterface
         return $bootstrapProfile->getChannelFactory()->createChannel(new BufferedSource($connection), $connection);
     }
 
-    public static function withClass(WorkerBootstrapProfile $bootstrapProfile, $implementationClassName)
+    public static function withClass($socketAddress, WorkerBootstrapProfile $bootstrapProfile, $implementationClassName)
     {
-        return new static($bootstrapProfile, $bootstrapProfile->generateExpression($implementationClassName));
+        return new static($socketAddress, $bootstrapProfile, $bootstrapProfile->generateExpression($implementationClassName));
     }
 
-    public static function withExpression(WorkerBootstrapProfile $bootstrapProfile, $implementationExpression)
+    public static function withExpression($socketAddress, WorkerBootstrapProfile $bootstrapProfile, $implementationExpression)
     {
-        return new static($bootstrapProfile, $implementationExpression);
+        return new static($socketAddress, $bootstrapProfile, $implementationExpression);
     }
 
     public static function startWithClass($socketAddress, WorkerBootstrapProfile $bootstrapProfile, $implementationClassName)
@@ -92,13 +94,13 @@ class SharedWorker implements ChannelInterface
         }
     }
 
-    public static function stop($socketAddress, WorkerBootstrapProfile $bootstrapProfile)
+    public static function stopWorker($socketAddress, WorkerBootstrapProfile $bootstrapProfile)
     {
         $stopCookie = $bootstrapProfile->getStopCookie();
         if ($stopCookie === null) {
             throw new Exception\LogicException('Cannot stop a shared worker without a stop cookie');
         }
-        self::sendStopMessage(self::connect($socketAddress, $bootstrapProfile)->sendMessage(), $stopCookie);
+        self::sendStopMessage(self::connect($socketAddress, $bootstrapProfile), $stopCookie);
     }
 
     public static function stopCurrent()

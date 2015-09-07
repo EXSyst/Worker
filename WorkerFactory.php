@@ -60,6 +60,6 @@ class WorkerFactory
 
     public function stopSharedWorker($socketAddress)
     {
-        SharedWorker::stop($socketAddress, $this->bootstrapProfile);
+        SharedWorker::stopWorker($socketAddress, $this->bootstrapProfile);
     }
 }

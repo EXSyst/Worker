@@ -196,9 +196,9 @@ final class WorkerRunner
             $timeout = intval(ini_get("default_socket_timeout"));
         }
         if ($socketContext !== null) {
-            return stream_socket_client($socketAddress, $errno2, $errstr2, $timeout, STREAM_CLIENT_CONNECT, $socketContext);
+            return stream_socket_client($socketAddress, $errno, $errstr, $timeout, STREAM_CLIENT_CONNECT, $socketContext);
         } else {
-            return stream_socket_client($socketAddress, $errno2, $errstr2, $timeout, STREAM_CLIENT_CONNECT);
+            return stream_socket_client($socketAddress, $errno, $errstr, $timeout, STREAM_CLIENT_CONNECT);
         }
     }
 

@@ -229,7 +229,7 @@ class WorkerBootstrapProfile
         return $this;
     }
 
-    public function addConstructorArgumentWithValue($name, $value)
+    public function addConstructorArgumentWithValue($value)
     {
         return $this->addConstructorArgumentWithExpression(self::exportPHPValue($value));
     }
@@ -355,15 +355,15 @@ class WorkerBootstrapProfile
 
     public function compileScriptWithExpression($expression, $socketAddress, &$scriptPath, &$mustDeleteScriptOnError)
     {
-        $scriptPath = $this->getPrecompiledScriptWithExpression($implementationExpression, $socketAddress);
+        $scriptPath = $this->getPrecompiledScriptWithExpression($expression, $socketAddress);
         if ($scriptPath === null) {
             $mustDeleteScriptOnError = true;
             $scriptPath = tempnam(sys_get_temp_dir(), 'xsW');
-            file_put_contents($scriptPath, $this->generateScriptWithExpression($implementationExpression, $socketAddress));
+            file_put_contents($scriptPath, $this->generateScriptWithExpression($expression, $socketAddress));
         } else {
             $mustDeleteScriptOnError = false;
             if (!file_exists($scriptPath)) {
-                file_put_contents($scriptPath, $this->generateScriptWithExpression($implementationExpression, $socketAddress));
+                file_put_contents($scriptPath, $this->generateScriptWithExpression($expression, $socketAddress));
             }
         }
         return $this;
