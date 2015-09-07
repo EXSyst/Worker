@@ -60,6 +60,10 @@ class WorkerBootstrapProfile
      */
     private $stopCookie;
     /**
+     * @var string|null
+     */
+    private $killSwitchPath;
+    /**
      * @var array
      */
     private $precompiledScripts;
@@ -78,6 +82,7 @@ class WorkerBootstrapProfile
         $this->loopExpression = null;
         $this->socketContextExpression = null;
         $this->stopCookie = null;
+        $this->killSwitchPath = null;
         $this->precompiledScripts = [ ];
     }
 
@@ -310,6 +315,17 @@ class WorkerBootstrapProfile
         return $this->stopCookie;
     }
 
+    public function setKillSwitchPath($killSwitchPath)
+    {
+        $this->killSwitchPath = $killSwitchPath;
+        return $this;
+    }
+
+    public function getKillSwitchPath()
+    {
+        return $this->killSwitchPath;
+    }
+
     public function setPrecompiledScripts(array $precompiledScripts)
     {
         $this->precompiledScripts = $precompiledScripts;
@@ -406,6 +422,7 @@ class WorkerBootstrapProfile
             (($this->loopExpression !== null) ? (WorkerRunner::class . '::setLoop(' . $this->loopExpression . ');' . PHP_EOL) : '') .
             (($this->socketContextExpression !== null) ? (WorkerRunner::class . '::setSocketContext(' . $this->socketContextExpression . ');' . PHP_EOL) : '') .
             (($this->stopCookie !== null) ? (WorkerRunner::class . '::setStopCookie(' . self::exportPhpValue($this->stopCookie) . ');' . PHP_EOL) : '') .
+            (($this->killSwitchPath !== null) ? (WorkerRunner::class . '::setKillSwitchPath(' . self::exportPhpValue($this->killSwitchPath) . ');' . PHP_EOL) : '') .
             (($socketAddress === null)
                 ? (WorkerRunner::class . '::runDedicatedWorker($' . $this->variableName . ');')
                 : (WorkerRunner::class . '::runSharedWorker($' . $this->variableName . ', ' . self::exportPhpValue($socketAddress) . ');'));

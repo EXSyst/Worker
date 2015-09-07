@@ -171,6 +171,41 @@ A master can connect to a network-exposed shared worker on another machine, as w
 
 **Warning : for security reasons, please do not use a ```SerializedChannelFactory``` (which is the default) on a network-exposed shared worker (see [```unserialize```](http://php.net/unserialize#refsect1-function.unserialize-notes) for more info). Instead, consider using a channel factory which uses a safe format, such as a ```JsonChannelFactory```.**
 
+## Disabling shared workers
+You may want to disable shared workers, for example as part of the deployment of a newer release of your application.
+
+To this end, the library provides a kill switch, in the form of a JSON file which contains :
+- A flag, which indicates whether shared workers are globally disabled for the current bootstrap profile (and may be used as part of a deployment) ;
+- A list of socket addresses which indicate which specific shared workers, if any, are disabled.
+
+You can manipulate the kill switch from the worker factory, for example :
+```php
+<?php
+$wbsp = new WorkerBootstrapProfile();
+$wbsp->setKillSwitchPath(__DIR__ . '/WorkerKillSwitch.json');
+$wf = new WorkerFactory($wbsp);
+// Save state :
+$global = $wf->areSharedWorkerDisabledGlobally();
+$addresses = $wf->getDisabledSharedWorkers();
+// Disable them globally :
+$wf->disableSharedWorkersGlobally();
+// Disable the one from our previous example :
+$wf->disableSharedWorker('unix://' . __DIR__ . '/Worker.sock');
+// "Revert" our changes :
+$wf->reEnableSharedWorker('unix://' . __DIR__ . '/Worker.sock');
+$wf->reEnableSharedWorkersGlobally();
+// Re-enable every single worker :
+$wf->reEnableAllSharedWorkers();
+// Really revert our changes :
+if ($global) {
+  $wf->disableSharedWorkersGlobally();
+}
+// If it fits between foreach and as, disable/reEnableSharedWorker will accept it and will process all of its elements in a single transaction.
+$wf->disableSharedWorker($addresses);
+```
+
+Please note that disabling shared workers will not automatically stop them (and disabling them globally can't, as the library doesn't keep track of a list of all running shared workers). If you want to disable running workers, you must stop them manually, **after** disabling them (to avoid a race condition, where they could be restarted after you stop them, but before you disable them).
+
 ## The bootstrap profile
 This object contains all the parameters needed to initialize a worker. The library is designed to try and provide default values for mandatory parameters :
 - The ```php``` or ```hhvm``` executable's path and arguments (by default, will be auto-detected using [```symfony/process```](https://github.com/symfony/Process)) ;
@@ -184,6 +219,7 @@ This object contains all the parameters needed to initialize a worker. The libra
 - The event loop expression which will be evaluated by the worker, after "stage 3" (by default, none, which will make the subprocess automatically call [```Factory::create()```](https://github.com/reactphp/event-loop/blob/master/src/Factory.php)) ;
 - The socket context expression which will be evaluated by the worker, after "stage 3" (by default, none, which will make the shared workers' server sockets be created without contexts) ;
 - The "stop cookie", which is a pre-shared secret string that must be sent to a shared worker as part of an appropriate message to make it gracefully stop (by default, none, which makes it impossible to gracefully stop a shared worker using this mechanism) ;
+- The kill switch path : the kill switch is a JSON file which indicates if shared workers are globally disabled, and if not, which specific shared workers, if any, are disabled (by default, none, which makes it impossible to disable shared workers) ;
 - The precompiled script map, which allows reusing the same script for every worker which uses the same implementation, instead of using a "generate in ```/tmp```, run once, then delete" approach (by default, none).
 
 If you don't specify a bootstrap profile when creating your worker factory, it will automatically create one, with the default values of all parameters.

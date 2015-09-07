@@ -15,12 +15,15 @@ class SharedWorker implements ChannelInterface
     private $channel;
     private $stopCookie;
 
-    protected function __construct($socketAddress, WorkerBootstrapProfile $bootstrapProfile, $implementationExpression = null)
+    protected function __construct($socketAddress, WorkerBootstrapProfile $bootstrapProfile, $implementationExpression = null, $autoStart = true)
     {
         $this->stopCookie = $bootstrapProfile->getStopCookie();
         try {
             $this->channel = self::connect($socketAddress, $bootstrapProfile);
         } catch (Exception\RuntimeException $e) {
+            if (!$autoStart) {
+                throw $e;
+            }
             static::startWithExpression($socketAddress, $bootstrapProfile, $implementationExpression, true);
             // Try every 0.2s for 10s
             for ($i = 0; $i < 50; ++$i) {
@@ -51,14 +54,14 @@ class SharedWorker implements ChannelInterface
         return $bootstrapProfile->getChannelFactory()->createChannel(new BufferedSource($connection), $connection);
     }
 
-    public static function withClass($socketAddress, WorkerBootstrapProfile $bootstrapProfile, $implementationClassName)
+    public static function withClass($socketAddress, WorkerBootstrapProfile $bootstrapProfile, $implementationClassName = null, $autoStart = true)
     {
-        return new static($socketAddress, $bootstrapProfile, $bootstrapProfile->generateExpression($implementationClassName));
+        return new static($socketAddress, $bootstrapProfile, ($implementationClassName === null) ? null : $bootstrapProfile->generateExpression($implementationClassName), $autoStart);
     }
 
-    public static function withExpression($socketAddress, WorkerBootstrapProfile $bootstrapProfile, $implementationExpression)
+    public static function withExpression($socketAddress, WorkerBootstrapProfile $bootstrapProfile, $implementationExpression = null, $autoStart = true)
     {
-        return new static($socketAddress, $bootstrapProfile, $implementationExpression);
+        return new static($socketAddress, $bootstrapProfile, $implementationExpression, $autoStart);
     }
 
     public static function startWithClass($socketAddress, WorkerBootstrapProfile $bootstrapProfile, $implementationClassName)

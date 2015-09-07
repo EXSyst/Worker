@@ -29,6 +29,10 @@ final class WorkerRunner
      */
     private static $stopCookie;
     /**
+     * @var string|null
+     */
+    private static $killSwitchPath;
+    /**
      * @var LoopInterface|null
      */
     private static $loop;
@@ -65,6 +69,16 @@ final class WorkerRunner
     public static function getStopCookie()
     {
         return self::$stopCookie;
+    }
+
+    public static function setKillSwitchPath($killSwitchPath)
+    {
+        self::$killSwitchPath = $killSwitchPath;
+    }
+
+    public static function getKillSwitchPath()
+    {
+        return self::$killSwitchPath;
     }
 
     public static function setLoop(LoopInterface $loop)
@@ -205,6 +219,12 @@ final class WorkerRunner
     private static function startListening($socketAddress)
     {
         $lock = Lock::acquire();
+        if (self::$killSwitchPath !== null) {
+            $kswitch = new KillSwitch(self::$killSwitchPath);
+            if ($kswitch->getGlobal() || $kswitch->hasAddress($socketAddress)) {
+                throw new Exception\RuntimeException("This worker has been prevented from starting using the kill switch");
+            }
+        }
         $socketFile = substr_compare($socketAddress, "unix://", 0, 7) ? null : substr($socketAddress, 7);
         $server = self::createServerSocket($socketAddress, $errno, $errstr, self::$socketContext);
         if ($server === false) {
