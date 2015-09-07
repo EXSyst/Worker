@@ -50,14 +50,14 @@ final class AutoloaderFinder
 
     private static function pop($directory, $partToCheck)
     {
-        if ($directory !== null && filename($directory) == $partToCheck) {
+        if ($directory !== null && basename($directory) == $partToCheck) {
             return dirname($directory);
         }
     }
 
     private static function check($directory, $partToCheck)
     {
-        if ($directory !== null && filename($directory) == $partToCheck) {
+        if ($directory !== null && basename($directory) == $partToCheck) {
             return $directory;
         }
     }

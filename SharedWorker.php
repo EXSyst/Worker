@@ -81,7 +81,7 @@ class SharedWorker implements ChannelInterface
 
         try {
             $line = array_merge([$php], $phpArgs, [$scriptPath]);
-            system(implode(' ', array_map('escapeshellarg', $line)).' &');
+            system(implode(' ', array_map('escapeshellarg', $line)).' >/dev/null 2>&1 &');
         } catch (\Exception $e) {
             if ($deleteScript) {
                 unlink($scriptPath);
@@ -96,7 +96,13 @@ class SharedWorker implements ChannelInterface
         if ($stopCookie === null) {
             throw new Exception\LogicException('Cannot stop a shared worker without a stop cookie');
         }
-        self::sendStopMessage(self::connect($socketAddress, $bootstrapProfile), $stopCookie);
+        try {
+            $channel = self::connect($socketAddress, $bootstrapProfile);
+        } catch (Exception\RuntimeException $e) {
+            return false;
+        }
+        self::sendStopMessage($channel, $stopCookie);
+        return true;
     }
 
     public static function stopCurrent()

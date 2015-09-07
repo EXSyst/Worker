@@ -184,9 +184,9 @@ final class WorkerRunner
     public static function createServerSocket($socketAddress, &$errno, &$errstr, $socketContext = null)
     {
         if ($socketContext !== null) {
-            return stream_socket_server($socketAddress, $errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $socketContext);
+            return @stream_socket_server($socketAddress, $errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $socketContext);
         } else {
-            return stream_socket_server($socketAddress, $errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN);
+            return @stream_socket_server($socketAddress, $errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN);
         }
     }
 
@@ -196,9 +196,9 @@ final class WorkerRunner
             $timeout = intval(ini_get("default_socket_timeout"));
         }
         if ($socketContext !== null) {
-            return stream_socket_client($socketAddress, $errno, $errstr, $timeout, STREAM_CLIENT_CONNECT, $socketContext);
+            return @stream_socket_client($socketAddress, $errno, $errstr, $timeout, STREAM_CLIENT_CONNECT, $socketContext);
         } else {
-            return stream_socket_client($socketAddress, $errno, $errstr, $timeout, STREAM_CLIENT_CONNECT);
+            return @stream_socket_client($socketAddress, $errno, $errstr, $timeout, STREAM_CLIENT_CONNECT);
         }
     }
 
