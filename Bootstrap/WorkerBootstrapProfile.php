@@ -12,7 +12,7 @@ use EXSyst\Component\Worker\Internal\WorkerRunner;
 class WorkerBootstrapProfile
 {
     /**
-     * @var string
+     * @var string|null
      */
     private $phpExecutablePath;
     /**
@@ -48,15 +48,15 @@ class WorkerBootstrapProfile
      */
     private $channelFactory;
     /**
-     * @var string
+     * @var string|null
      */
     private $loopExpression;
     /**
-     * @var string
+     * @var string|null
      */
     private $socketContextExpression;
     /**
-     * @var string
+     * @var string|null
      */
     private $stopCookie;
     /**

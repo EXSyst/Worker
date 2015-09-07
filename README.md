@@ -160,7 +160,7 @@ class MySharedWorkerImpl implements SharedWorkerImplementationInterface
 ## Gracefully stopping a shared worker
 The library provides two ways of gracefully stopping your shared workers :
 - You can call ```SharedWorker::stopCurrent()``` from inside your worker, and then manually clean up all the other resources ;
-- You can send an appropriate stop message to your worker using ```->stop()``` if you have configured a "stop cookie" (see below).
+- You can send an appropriate stop message to your worker using ```$worker->stop()``` or ```$workerFactory->stopSharedWorker($socketAddress)``` if you have configured a "stop cookie" (see below).
 
 If you use a "stop cookie", and if your shared worker owns resources (such as, for example, sub-worker pools, or [Ratchet](https://github.com/ratchetphp/Ratchet) server sockets) and has registered them against the event loop, it must, in its ```onStop``` method, either unregister them, or stop the loop : the loop will not stop automatically as long as any resources remain registered against it, which will make your shared worker unable to stop if you forget to unregister resources.
 
