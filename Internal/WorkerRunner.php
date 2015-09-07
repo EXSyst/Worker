@@ -204,34 +204,29 @@ final class WorkerRunner
 
     private static function startListening($socketAddress)
     {
-        $fd = fopen(__FILE__, 'rb');
-        try {
-            flock($fd, LOCK_EX);
-            $socketFile = substr_compare($socketAddress, "unix://", 0, 7) ? null : substr($socketAddress, 7);
-            $server = self::createServerSocket($socketAddress, $errno, $errstr, self::$socketContext);
-            if ($server === false) {
-                if (strpos($errstr, 'Address already in use') !== false) {
-                    $client = self::createClientSocket($socketAddress, $errno, $errstr, 1, self::$socketContext);
-                    if ($client !== false) {
-                        // Really in use
-                        fclose($client);
-                        throw new Exception\RuntimeException("Can't create server socket : " . $errstr, $errno);
-                    } else {
-                        // False positive due to a residual socket file
-                        unlink($socketFile);
-                        $server = self::createServerSocket($socketAddress, $errno, $errstr, self::$socketContext);
-                        if ($server === false) {
-                            throw new Exception\RuntimeException("Can't create server socket : " . $errstr, $errno);
-                        }
-                    }
-                } else {
+        $lock = Lock::acquire();
+        $socketFile = substr_compare($socketAddress, "unix://", 0, 7) ? null : substr($socketAddress, 7);
+        $server = self::createServerSocket($socketAddress, $errno, $errstr, self::$socketContext);
+        if ($server === false) {
+            if (strpos($errstr, 'Address already in use') !== false) {
+                $client = self::createClientSocket($socketAddress, $errno, $errstr, 1, self::$socketContext);
+                if ($client !== false) {
+                    // Really in use
+                    fclose($client);
                     throw new Exception\RuntimeException("Can't create server socket : " . $errstr, $errno);
+                } else {
+                    // False positive due to a residual socket file
+                    unlink($socketFile);
+                    $server = self::createServerSocket($socketAddress, $errno, $errstr, self::$socketContext);
+                    if ($server === false) {
+                        throw new Exception\RuntimeException("Can't create server socket : " . $errstr, $errno);
+                    }
                 }
+            } else {
+                throw new Exception\RuntimeException("Can't create server socket : " . $errstr, $errno);
             }
-        } finally {
-            flock($fd, LOCK_UN);
-            fclose($fd);
         }
+        $lock->release();
         self::$socket = $server;
         self::$listening = true;
         self::$toDelete = $socketFile;
