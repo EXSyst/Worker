@@ -81,9 +81,9 @@ class WorkerBootstrapProfile
         $this->precompiledScripts = [ ];
     }
 
-    public static function create()
+    public static function create($withAutoloader = true)
     {
-        return new self();
+        return new self($withAutoloader);
     }
 
     public function setPhpExecutablePath($phpExecutablePath)
