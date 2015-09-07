@@ -154,7 +154,7 @@ class WorkerBootstrapProfile
 
     public function addStage1GlobalVariableWithValue($name, $value)
     {
-        return $this->addStage1GlobalVariableWithExpression($name, self::exportPHPValue($value));
+        return $this->addStage1GlobalVariableWithExpression($name, self::exportPhpValue($value));
     }
 
     public function getStage1Parts()
@@ -198,7 +198,7 @@ class WorkerBootstrapProfile
 
     public function addStage2GlobalVariableWithValue($name, $value)
     {
-        return $this->addStage2GlobalVariableWithExpression($name, self::exportPHPValue($value));
+        return $this->addStage2GlobalVariableWithExpression($name, self::exportPhpValue($value));
     }
 
     public function getStage2Parts()
@@ -231,7 +231,7 @@ class WorkerBootstrapProfile
 
     public function addConstructorArgumentWithValue($value)
     {
-        return $this->addConstructorArgumentWithExpression(self::exportPHPValue($value));
+        return $this->addConstructorArgumentWithExpression(self::exportPhpValue($value));
     }
 
     public function getConstructorArguments()
@@ -258,7 +258,7 @@ class WorkerBootstrapProfile
 
     public function addStage3GlobalVariableWithValue($name, $value)
     {
-        return $this->addStage3GlobalVariableWithExpression($name, self::exportPHPValue($value));
+        return $this->addStage3GlobalVariableWithExpression($name, self::exportPhpValue($value));
     }
 
     public function getStage3Parts()
@@ -393,7 +393,7 @@ class WorkerBootstrapProfile
                 return $part . PHP_EOL;
             }, array_filter($this->stage1Parts))) .
             implode(array_map(function ($script) {
-                return 'require_once ' . self::exportPHPValue($script) . ';' . PHP_EOL;
+                return 'require_once ' . self::exportPhpValue($script) . ';' . PHP_EOL;
             }, array_filter($this->scriptsToRequire))) .
             implode(array_map(function ($part) {
                 return $part . PHP_EOL;
@@ -402,16 +402,16 @@ class WorkerBootstrapProfile
             implode(array_map(function ($part) {
                 return $part . PHP_EOL;
             }, array_filter($this->stage3Parts))) .
-            WorkerRunner::class . '::setChannelFactory(' . self::exportPHPValue($this->channelFactory) . ');' . PHP_EOL .
+            WorkerRunner::class . '::setChannelFactory(' . self::exportPhpValue($this->channelFactory) . ');' . PHP_EOL .
             (($this->loopExpression !== null) ? (WorkerRunner::class . '::setLoop(' . $this->loopExpression . ');' . PHP_EOL) : '') .
             (($this->socketContextExpression !== null) ? (WorkerRunner::class . '::setSocketContext(' . $this->socketContextExpression . ');' . PHP_EOL) : '') .
-            (($this->stopCookie !== null) ? (WorkerRunner::class . '::setStopCookie(' . self::exportPHPValue($this->stopCookie) . ');' . PHP_EOL) : '') .
+            (($this->stopCookie !== null) ? (WorkerRunner::class . '::setStopCookie(' . self::exportPhpValue($this->stopCookie) . ');' . PHP_EOL) : '') .
             (($socketAddress === null)
                 ? (WorkerRunner::class . '::runDedicatedWorker($' . $this->variableName . ');')
-                : (WorkerRunner::class . '::runSharedWorker($' . $this->variableName . ', ' . self::exportPHPValue($socketAddress) . ');'));
+                : (WorkerRunner::class . '::runSharedWorker($' . $this->variableName . ', ' . self::exportPhpValue($socketAddress) . ');'));
     }
 
-    public static function exportPHPValue($value)
+    public static function exportPhpValue($value)
     {
         switch (gettype($value)) {
             case "boolean":
