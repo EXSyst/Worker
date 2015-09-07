@@ -83,7 +83,7 @@ class WorkerPool implements ArrayAccess, Countable, IteratorAggregate
             $listener2 = function ($worker, $loop) use ($listener) {
                 $this->unregisterRead($loop);
                 call_user_func($listener, $worker, $loop);
-            }
+            };
             foreach ($this->workers as $worker) {
                 Selectable::registerRead($loop, $worker, $listener2);
             }
