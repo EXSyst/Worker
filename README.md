@@ -82,6 +82,8 @@ foreach ($wp as $w) {
   ++$i;
 }
 while ($i < 10) {
+  // WorkerPool->receiveMessage takes an output parameter, which it fills
+  // with the worker which actually received the returned message
   var_dump($wp->receiveMessage($w));
   $w->sendMessage($i);
   ++$i;
