@@ -2,8 +2,6 @@
 
 namespace EXSyst\Component\Worker;
 
-use Symfony\Component\Process\PhpExecutableFinder;
-
 use EXSyst\Component\IO\Source;
 use EXSyst\Component\IO\Sink;
 
@@ -20,32 +18,8 @@ class Worker implements ChannelInterface
 
     protected function __construct(WorkerBootstrapProfile $bootstrapProfile, $implementationExpression)
     {
-        $php = $bootstrapProfile->getPhpExecutablePath();
-        $phpArgs = $bootstrapProfile->getPhpArguments();
-        if ($php === null || $phpArgs === null) {
-            $executableFinder = new PhpExecutableFinder();
-            if ($php === null) {
-                $php = $executableFinder->find(false);
-                if ($php === false) {
-                    throw new Exception\RuntimeException('Unable to find the PHP executable.');
-                }
-            }
-            if ($phpArgs === null) {
-                $phpArgs = $executableFinder->findArguments();
-            }
-        }
-
-        $scriptPath = $bootstrapProfile->getPrecompiledScriptWithExpression($implementationExpression);
-        if ($scriptPath === null) {
-            $deleteScript = true;
-            $scriptPath = tempnam(sys_get_temp_dir(), 'xsW');
-            file_put_contents($scriptPath, $bootstrapProfile->generateScriptWithExpression($implementationExpression));
-        } else {
-            $deleteScript = false;
-            if (!file_exists($scriptPath)) {
-                file_put_contents($scriptPath, $bootstrapProfile->generateScriptWithExpression($implementationExpression));
-            }
-        }
+        $bootstrapProfile->getOrFindPhpExecutablePathAndArguments($php, $phpArgs);
+        $bootstrapProfile->compileScriptWithExpression($implementationExpression, null, $scriptPath, $deleteScript);
 
         try {
             $line = array_merge([ $php ], $phpArgs, [ $scriptPath ]);

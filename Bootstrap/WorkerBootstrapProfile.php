@@ -2,6 +2,8 @@
 
 namespace EXSyst\Component\Worker;
 
+use Symfony\Component\Process\PhpExecutableFinder;
+
 use EXSyst\Component\IO\Channel\ChannelFactoryInterface;
 use EXSyst\Component\IO\Channel\SerializedChannelFactory;
 
@@ -112,6 +114,25 @@ class WorkerBootstrapProfile
     public function getPhpArguments()
     {
         return $this->phpArguments;
+    }
+
+    public function getOrFindPhpExecutablePathAndArguments(&$phpExecutablePath, &$phpArguments)
+    {
+        $phpExecutablePath = $this->phpExecutablePath;
+        $phpArguments = $this->phpArguments;
+        if ($phpExecutablePath === null || $phpArguments === null) {
+            $executableFinder = new PhpExecutableFinder();
+            if ($phpExecutablePath === null) {
+                $phpExecutablePath = $executableFinder->find(false);
+                if ($phpExecutablePath === false) {
+                    throw new Exception\RuntimeException('Unable to find the PHP executable.');
+                }
+            }
+            if ($phpArguments === null) {
+                $phpArguments = $executableFinder->findArguments();
+            }
+        }
+        return $this;
     }
 
     public function setStage1Parts(array $stage1Parts = [ ])
@@ -325,6 +346,27 @@ class WorkerBootstrapProfile
             $expression .= '/*' . $socketAddress . '*/';
         }
         return isset($this->precompiledScripts[$expression]) ? $this->precompiledScripts[$expression] : null;
+    }
+
+    public function compileScript($className, $socketAddress, &$scriptPath, &$mustDeleteScriptOnError)
+    {
+        return $this->compileScriptWithExpression($this->generateExpression($className), $socketAddress, $scriptPath, $mustDeleteScriptOnError);
+    }
+
+    public function compileScriptWithExpression($expression, $socketAddress, &$scriptPath, &$mustDeleteScriptOnError)
+    {
+        $scriptPath = $bootstrapProfile->getPrecompiledScriptWithExpression($implementationExpression, $socketAddress);
+        if ($scriptPath === null) {
+            $mustDeleteScriptOnError = true;
+            $scriptPath = tempnam(sys_get_temp_dir(), 'xsW');
+            file_put_contents($scriptPath, $bootstrapProfile->generateScriptWithExpression($implementationExpression, $socketAddress));
+        } else {
+            $mustDeleteScriptOnError = false;
+            if (!file_exists($scriptPath)) {
+                file_put_contents($scriptPath, $bootstrapProfile->generateScriptWithExpression($implementationExpression, $socketAddress));
+            }
+        }
+        return $this;
     }
 
     public function generateExpression($className)

@@ -2,8 +2,6 @@
 
 namespace EXSyst\Component\Worker;
 
-use Symfony\Component\Process\PhpExecutableFinder;
-
 use EXSyst\Component\IO\Source;
 use EXSyst\Component\IO\Source\BufferedSource;
 
@@ -80,32 +78,8 @@ class SharedWorker implements ChannelInterface
             }
         }
 
-        $php = $bootstrapProfile->getPhpExecutablePath();
-        $phpArgs = $bootstrapProfile->getPhpArguments();
-        if ($php === null || $phpArgs === null) {
-            $executableFinder = new PhpExecutableFinder();
-            if ($php === null) {
-                $php = $executableFinder->find(false);
-                if ($php === false) {
-                    throw new Exception\RuntimeException('Unable to find the PHP executable.');
-                }
-            }
-            if ($phpArgs === null) {
-                $phpArgs = $executableFinder->findArguments();
-            }
-        }
-
-        $scriptPath = $bootstrapProfile->getPrecompiledScriptWithExpression($implementationExpression, $socketAddress);
-        if ($scriptPath === null) {
-            $deleteScript = true;
-            $scriptPath = tempnam(sys_get_temp_dir(), 'xsW');
-            file_put_contents($scriptPath, $bootstrapProfile->generateScriptWithExpression($implementationExpression, $socketAddress));
-        } else {
-            $deleteScript = false;
-            if (!file_exists($scriptPath)) {
-                file_put_contents($scriptPath, $bootstrapProfile->generateScriptWithExpression($implementationExpression, $socketAddress));
-            }
-        }
+        $bootstrapProfile->getOrFindPhpExecutablePathAndArguments($php, $phpArgs);
+        $bootstrapProfile->compileScriptWithExpression($implementationExpression, $socketAddress, $scriptPath, $deleteScript);
 
         try {
             $line = array_merge([ $php ], $phpArgs, [ $scriptPath ]);
