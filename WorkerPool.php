@@ -18,6 +18,10 @@ class WorkerPool implements ArrayAccess, Countable, IteratorAggregate
 
     protected function __construct(WorkerBootstrapProfile $bootstrapProfile, $implementationExpression, $workerCount)
     {
+        $workerCount = intval($workerCount);
+        if ($workerCount <= 0) {
+            throw new Exception\InvalidArgumentException("The worker count must be a strictly positive number !");
+        }
         $this->workers = [ ];
         while ($workerCount-- > 0) {
             $this->workers[] = Worker::withExpression($bootstrapProfile, $implementationExpression);
