@@ -42,7 +42,7 @@ class MyWorkerImpl implements RawWorkerImplementationInterface
 ```
 
 ### ```MyWorkerImpl.php```, as an evented worker
-Evented workers require [```reactphp/event-loop```](https://github.com/reactphp/event-loop). For simple use cases, they can be more complex than raw workers, but for complex use cases, their power will lead to a generally simpler worker implementation.
+Evented workers require [```react/event-loop```](https://github.com/reactphp/event-loop). For simple use cases, they can be more complex than raw workers, but for complex use cases, their power will lead to a generally simpler worker implementation.
 ```php
 <?php
 class MyWorkerImpl implements EventedWorkerImplementationInterface

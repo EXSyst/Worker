@@ -18,7 +18,7 @@
         "phpunit/phpunit": "~4"
     },
     "suggest": {
-        "reactphp/event-loop": "Allows spawning evented (and shared) workers"
+        "react/event-loop": "Allows spawning evented (and shared) workers"
     },
     "autoload": {
         "psr-0": {
