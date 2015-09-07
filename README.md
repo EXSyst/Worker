@@ -142,7 +142,7 @@ class MySharedWorkerImpl implements SharedWorkerImplementationInterface
   {
     $units = $n % 10;
     $tens = (($n % 100) - $units) / 10;
-    if ($tens == 10) {
+    if ($tens == 1) {
       return $n . 'th';
     } elseif ($units == 1) {
       return $n . 'st';
