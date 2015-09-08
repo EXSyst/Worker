@@ -2,23 +2,18 @@
 
 namespace EXSyst\Component\Worker\Internal;
 
-use ErrorException;
 use stdClass;
-
 use EXSyst\Component\IO\Channel\ChannelFactoryInterface;
 use EXSyst\Component\IO\Channel\SerializedChannelFactory;
-
 use EXSyst\Component\IO\Exception as IOException;
 use EXSyst\Component\IO\Selectable;
 use EXSyst\Component\IO\Sink;
 use EXSyst\Component\IO\Source;
 use EXSyst\Component\IO\Source\BufferedSource;
-
 use EXSyst\Component\Worker\EventedWorkerImplementationInterface;
 use EXSyst\Component\Worker\Exception;
 use EXSyst\Component\Worker\RawWorkerImplementationInterface;
 use EXSyst\Component\Worker\SharedWorkerImplementationInterface;
-
 use React\EventLoop\Factory;
 use React\EventLoop\LoopInterface;
 
@@ -88,8 +83,9 @@ final class WorkerRunner
 
     public static function getLoop()
     {
-        if (self::$loop === null)
+        if (self::$loop === null) {
             self::$loop = Factory::create();
+        }
         return self::$loop;
     }
 
@@ -100,8 +96,9 @@ final class WorkerRunner
 
     public static function getChannelFactory()
     {
-        if (self::$channelFactory === null)
+        if (self::$channelFactory === null) {
             self::$channelFactory = SerializedChannelFactory::getInstance();
+        }
         return self::$channelFactory;
     }
 

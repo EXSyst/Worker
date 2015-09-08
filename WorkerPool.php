@@ -22,7 +22,7 @@ class WorkerPool implements ArrayAccess, Countable, IteratorAggregate
         if ($workerCount <= 0) {
             throw new Exception\InvalidArgumentException("The worker count must be a strictly positive number !");
         }
-        $this->workers = [ ];
+        $this->workers = [];
         while ($workerCount-- > 0) {
             $this->workers[] = Worker::withExpression($bootstrapProfile, $implementationExpression);
         }

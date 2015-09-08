@@ -72,18 +72,18 @@ class WorkerBootstrapProfile
     {
         $this->phpExecutablePath = null;
         $this->phpArguments = null;
-        $this->stage1Parts = [ ];
-        $this->scriptsToRequire = $withAutoloader ? [ AutoloaderFinder::findAutoloader() ] : [ ];
-        $this->stage2Parts = [ ];
+        $this->stage1Parts = [];
+        $this->scriptsToRequire = $withAutoloader ? [ AutoloaderFinder::findAutoloader() ] : [];
+        $this->stage2Parts = [];
         $this->variableName = 'workerImpl';
-        $this->constructorArguments = [ ];
-        $this->stage3Parts = [ ];
+        $this->constructorArguments = [];
+        $this->stage3Parts = [];
         $this->channelFactory = SerializedChannelFactory::getInstance();
         $this->loopExpression = null;
         $this->socketContextExpression = null;
         $this->stopCookie = null;
         $this->killSwitchPath = null;
-        $this->precompiledScripts = [ ];
+        $this->precompiledScripts = [];
     }
 
     public static function create($withAutoloader = true)
@@ -110,8 +110,9 @@ class WorkerBootstrapProfile
 
     public function addPhpArgument($phpArgument)
     {
-        if ($this->phpArguments === null)
-            $this->phpArguments = [ ];
+        if ($this->phpArguments === null) {
+            $this->phpArguments = [];
+        }
         $this->phpArguments[] = $phpArgument;
         return $this;
     }
@@ -140,7 +141,7 @@ class WorkerBootstrapProfile
         return $this;
     }
 
-    public function setStage1Parts(array $stage1Parts = [ ])
+    public function setStage1Parts(array $stage1Parts = [])
     {
         $this->stage1Parts = $stage1Parts;
         return $this;
@@ -167,7 +168,7 @@ class WorkerBootstrapProfile
         return $this->stage1Parts;
     }
 
-    public function setScriptsToRequire(array $scriptsToRequire = [ ])
+    public function setScriptsToRequire(array $scriptsToRequire = [])
     {
         $this->scriptsToRequire = $scriptsToRequire;
         return $this;
@@ -184,7 +185,7 @@ class WorkerBootstrapProfile
         return $this->scriptsToRequire;
     }
 
-    public function setStage2Parts(array $stage2Parts = [ ])
+    public function setStage2Parts(array $stage2Parts = [])
     {
         $this->stage2Parts = $stage2Parts;
         return $this;
@@ -222,7 +223,7 @@ class WorkerBootstrapProfile
         return $this->variableName;
     }
 
-    public function setConstructorArguments(array $constructorArguments = [ ])
+    public function setConstructorArguments(array $constructorArguments = [])
     {
         $this->constructorArguments = $constructorArguments;
         return $this;
@@ -244,7 +245,7 @@ class WorkerBootstrapProfile
         return $this->constructorArguments;
     }
 
-    public function setStage3Parts(array $stage3Parts = [ ])
+    public function setStage3Parts(array $stage3Parts = [])
     {
         $this->stage3Parts = $stage3Parts;
         return $this;

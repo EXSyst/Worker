@@ -105,6 +105,7 @@ class SharedWorker implements ChannelInterface
             return false;
         }
         self::sendStopMessage($channel, $stopCookie);
+
         return true;
     }
 

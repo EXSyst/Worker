@@ -14,7 +14,7 @@ final class Lock
     private static $counter;
 
     /**
-     * @var boolean
+     * @var bool
      */
     private $held;
 
