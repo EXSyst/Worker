@@ -185,7 +185,7 @@ $wbsp = new WorkerBootstrapProfile();
 $wbsp->setKillSwitchPath(__DIR__ . '/WorkerKillSwitch.json');
 $wf = new WorkerFactory($wbsp);
 // Save state :
-$global = $wf->areSharedWorkerDisabledGlobally();
+$global = $wf->areSharedWorkersDisabledGlobally();
 $addresses = $wf->getDisabledSharedWorkers();
 // Disable them globally :
 $wf->disableSharedWorkersGlobally();

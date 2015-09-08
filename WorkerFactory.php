@@ -135,7 +135,7 @@ class WorkerFactory
         });
     }
 
-    public function areSharedWorkerDisabledGlobally()
+    public function areSharedWorkersDisabledGlobally()
     {
         return $this->transactKillSwitch(function (KillSwitch $kswitch) {
             return $kswitch->getGlobal();
