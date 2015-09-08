@@ -73,7 +73,7 @@ class WorkerBootstrapProfile
         $this->phpExecutablePath = null;
         $this->phpArguments = null;
         $this->stage1Parts = [];
-        $this->scriptsToRequire = $withAutoloader ? [ AutoloaderFinder::findAutoloader() ] : [];
+        $this->scriptsToRequire = $withAutoloader ? [AutoloaderFinder::findAutoloader()] : [];
         $this->stage2Parts = [];
         $this->variableName = 'workerImpl';
         $this->constructorArguments = [];
