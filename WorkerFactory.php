@@ -54,11 +54,15 @@ class WorkerFactory
     public function startSharedWorker($socketAddress, $implementationClassName)
     {
         SharedWorker::startWithClass($socketAddress, $this->bootstrapProfile, $implementationClassName);
+
+        return $this;
     }
 
     public function startSharedWorkerWithExpression($socketAddress, $implementationExpression)
     {
         SharedWorker::startWithExpression($socketAddress, $this->bootstrapProfile, $implementationExpression);
+
+        return $this;
     }
 
     public function stopSharedWorker($socketAddress)
