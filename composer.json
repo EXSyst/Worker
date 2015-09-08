@@ -22,9 +22,8 @@
         "react/event-loop": "Allows spawning evented (and shared) workers"
     },
     "autoload": {
-        "psr-0": {
-            "EXSyst\\Component\\Worker": ""
+        "psr-4": {
+            "EXSyst\\Component\\Worker\\": ""
         }
-    },
-    "target-dir": "EXSyst/Component/Worker"
+    }
 }

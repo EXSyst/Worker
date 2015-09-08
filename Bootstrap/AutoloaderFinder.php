@@ -17,9 +17,7 @@ final class AutoloaderFinder
                 $loader = self::push(
                     self::check(
                         self::pop(self::pop(
-                            self::pop(self::pop(self::pop(
-                                self::pop(__DIR__, 'Bootstrap'),
-                                'Worker'), 'Component'), 'EXSyst'),
+                            self::pop(__DIR__, 'Bootstrap'),
                             'worker'), 'exsyst'),
                         'vendor'),
                     'autoload.php');
