@@ -223,6 +223,12 @@ final class WorkerRunner
             }
         }
         $socketFile = substr_compare($socketAddress, "unix://", 0, 7) ? null : substr($socketAddress, 7);
+        if ($socketFile !== null) {
+            $socketDir = dirname($socketFile);
+            if (!is_dir($socketDir)) {
+                mkdir($socketDir, 0777, true);
+            }
+        }
         $server = self::createServerSocket($socketAddress, $errno, $errstr, self::$socketContext);
         if ($server === false) {
             if (strpos($errstr, 'Address already in use') !== false) {

@@ -39,6 +39,10 @@ class KillSwitch
 
     public function save()
     {
+        $dir = dirname($this->path);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
         if (file_put_contents($this->path, json_encode($this->data)) === false) {
             throw new Exception\RuntimeException("Can't save the kill switch file");
         }

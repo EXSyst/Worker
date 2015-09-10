@@ -376,6 +376,10 @@ class WorkerBootstrapProfile
         } else {
             $mustDeleteScriptOnError = false;
             if (!file_exists($scriptPath)) {
+                $scriptDir = dirname($scriptPath);
+                if (!is_dir($scriptDir)) {
+                    mkdir($scriptDir, 0777, true);
+                }
                 file_put_contents($scriptPath, $this->generateScriptWithExpression($expression, $socketAddress));
             }
         }
