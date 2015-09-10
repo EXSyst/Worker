@@ -409,7 +409,7 @@ class WorkerBootstrapProfile
     {
         return '<?php' . PHP_EOL .
             'set_time_limit(0);' . PHP_EOL .
-            (isset($this->precompiledScripts[$expression]) ? '' : ('unlink(__FILE__);' . PHP_EOL)) .
+            (isset($this->precompiledScripts[$this->combineExpressionWithSocketAddress($expression, $socketAddress)]) ? '' : ('unlink(__FILE__);' . PHP_EOL)) .
             implode(array_map(function ($part) {
                 return $part . PHP_EOL;
             }, array_filter($this->stage1Parts))) .
