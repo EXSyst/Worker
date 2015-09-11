@@ -70,6 +70,6 @@ class Range
 
     public function __toString()
     {
-        return ($this->inverted ? '@' : '').(($this->min == 0 && $this->min !== null) ? '' : ((($this->min === null) ? '~' : $this->min).':')).(($this->max !== null));
+        return ($this->inverted ? '@' : '').(($this->min == 0 && $this->min !== null) ? '' : ((($this->min === null) ? '~' : $this->min).':')).(($this->max !== null) ? $this->max : '');
     }
 }
