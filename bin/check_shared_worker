@@ -119,10 +119,10 @@ foreach ($counterTuples as $counter) {
     if ($workerCounter->getValue() === null) {
         $unknown = true;
     }
-    if ($worker[1] !== null && !$worker[1]->contains($workerCounter->getValue())) {
+    if ($counter[1] !== null && !$counter[1]->contains($workerCounter->getValue())) {
         $warning = true;
     }
-    if ($worker[2] !== null && !$worker[2]->contains($workerCounter->getValue())) {
+    if ($counter[2] !== null && !$counter[2]->contains($workerCounter->getValue())) {
         $critical = true;
     }
 }
