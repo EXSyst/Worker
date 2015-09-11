@@ -70,6 +70,11 @@ class WorkerFactory
         return SharedWorker::stopWorker($socketAddress, $this->bootstrapProfile);
     }
 
+    public function querySharedWorker($socketAddress)
+    {
+        return SharedWorker::queryWorker($socketAddress, $this->bootstrapProfile);
+    }
+
     private function transactKillSwitch(callable $operation)
     {
         $ksPath = $this->bootstrapProfile->getKillSwitchPath();

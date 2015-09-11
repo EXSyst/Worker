@@ -58,7 +58,7 @@ class WorkerBootstrapProfile
     /**
      * @var string|null
      */
-    private $stopCookie;
+    private $adminCookie;
     /**
      * @var string|null
      */
@@ -81,7 +81,7 @@ class WorkerBootstrapProfile
         $this->channelFactory = SerializedChannelFactory::getInstance();
         $this->loopExpression = null;
         $this->socketContextExpression = null;
-        $this->stopCookie = null;
+        $this->adminCookie = null;
         $this->killSwitchPath = null;
         $this->precompiledScripts = [];
     }
@@ -305,15 +305,15 @@ class WorkerBootstrapProfile
         return $this->socketContextExpression;
     }
 
-    public function setStopCookie($stopCookie)
+    public function setAdminCookie($adminCookie)
     {
-        $this->stopCookie = $stopCookie;
+        $this->adminCookie = $adminCookie;
         return $this;
     }
 
-    public function getStopCookie()
+    public function getAdminCookie()
     {
-        return $this->stopCookie;
+        return $this->adminCookie;
     }
 
     public function setKillSwitchPath($killSwitchPath)
@@ -426,7 +426,7 @@ class WorkerBootstrapProfile
             WorkerRunner::class . '::setChannelFactory(' . self::exportPhpValue($this->channelFactory) . ');' . PHP_EOL .
             (($this->loopExpression !== null) ? (WorkerRunner::class . '::setLoop(' . $this->loopExpression . ');' . PHP_EOL) : '') .
             (($this->socketContextExpression !== null) ? (WorkerRunner::class . '::setSocketContext(' . $this->socketContextExpression . ');' . PHP_EOL) : '') .
-            (($this->stopCookie !== null) ? (WorkerRunner::class . '::setStopCookie(' . self::exportPhpValue($this->stopCookie) . ');' . PHP_EOL) : '') .
+            (($this->adminCookie !== null) ? (WorkerRunner::class . '::setAdminCookie(' . self::exportPhpValue($this->adminCookie) . ');' . PHP_EOL) : '') .
             (($this->killSwitchPath !== null) ? (WorkerRunner::class . '::setKillSwitchPath(' . self::exportPhpValue($this->killSwitchPath) . ');' . PHP_EOL) : '') .
             (($socketAddress === null)
                 ? (WorkerRunner::class . '::runDedicatedWorker($' . $this->variableName . ');')

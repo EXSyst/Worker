@@ -1,0 +1,146 @@
+#!/usr/bin/env php
+<?php
+
+namespace EXSyst\Component\Worker\bin;
+
+use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\ConsoleOutput;
+use EXSyst\Component\Worker\Bootstrap\AutoloaderFinder;
+use EXSyst\Component\Worker\Bootstrap\WorkerBootstrapProfile;
+use EXSyst\Component\Worker\Exception;
+use EXSyst\Component\Worker\WorkerFactory;
+use EXSyst\Component\Worker\Status\Range;
+
+set_error_handler(function ($errno, $errstr) {
+    echo 'SHARED-WORKER UNKNOWN - ' . $errstr . PHP_EOL;
+    exit(3);
+});
+set_exception_handler(function ($ex) {
+    echo 'SHARED-WORKER UNKNOWN - ' . $ex->getMessage() . PHP_EOL;
+    exit(3);
+});
+
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'Bootstrap' . DIRECTORY_SEPARATOR . 'AutoloaderFinder.php';
+
+$autoloader = AutoloaderFinder::findAutoloader();
+
+if (!$autoloader) {
+    throw new \Exception('Unable to find the autoloader. Did you run composer ?');
+}
+
+require_once $autoloader;
+
+$inputDefinition = new InputDefinition();
+$inputDefinition->addOption('admin-cookie', 'a', InputOption::VALUE_REQUIRED, 'Admin cookie, to get full information from the worker');
+$inputDefinition->addOption('critical', 'c', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Critical thresholds (must be repeated exactly once for each counter)');
+$inputDefinition->addOption('counter', 'm', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Counters to use for checking warning/critical thresholds');
+$inputDefinition->addOption('warning', 'w', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Warning thresholds (must be repeated exactly once for each counter)');
+$inputDefinition->addArgument('socket-address', InputArgument::REQUIRED, 'Worker\'s socket address');
+
+$input = new ArgvInput($argv, $inputDefinition);
+$output = new ConsoleOutput();
+
+$warnings = $input->hasOption('warning') ? $input->getOption('warning') : [];
+$nWarnings = count($warnings);
+
+$criticals = $input->hasOption('critical') ? $input->getOption('critical') : [];
+$nCriticals = count($criticals);
+
+$counters = $input->hasOption('counter') ? $input->getOption('counter') : [];
+$nCounters = count($counters);
+
+if (($nWarnings != 0 && $nWarnings != $nCounters) || ($nCriticals != 0 && $nCriticals != $nCounters)) {
+    throw new \Exception('The --counter, --critical and --warning counts don\'t match.');
+}
+
+$counterTuples = [];
+foreach ($counters as $i => $counter) {
+    $counterTuples[$counter] = [$counter, ($i < $nWarnings) ? Range::fromString($warnings[$i]) : null, ($i < $nCriticals) ? Range::fromString($criticals[$i]) : null];
+}
+
+$wbsp = new WorkerBootstrapProfile();
+if ($input->hasOption('admin-cookie') && !empty($input->getOption('admin-cookie'))) {
+    $wbsp->setAdminCookie($input->getOption('admin-cookie'));
+}
+
+$wf = new WorkerFactory($wbsp);
+try {
+    $status = $wf->querySharedWorker($input->getArgument('socket-address'));
+} catch (Exception\ConnectException $e) {
+    $output->writeln('SHARED-WORKER CRITICAL - ' . $e->getMessage());
+    exit(2);
+}
+
+$critical = false;
+$warning = false;
+$unknown = false;
+
+$workerCounters = [];
+$performanceData = [];
+
+foreach ($status->getCounters() as $counter) {
+    $workerCounters[$counter->getName()] = $counter;
+    $perf = '\'' . str_replace('=', '', str_replace('\'', '', $counter->getName())) . '\'=';
+    if ($counter->getValue() !== null) {
+        $perf .= $counter->getValue();
+    } else {
+        $perf .= 'U';
+    }
+    if ($counter->getUnit() !== null) {
+        $perf .= str_replace(';', '', $counter->getUnit());
+    }
+    $perf .= ';';
+    if (isset($counterTuples[$counter->getName()][1])) {
+        $perf .= strval($counterTuples[$counter->getName()][1]);
+    }
+    $perf .= ';';
+    if (isset($counterTuples[$counter->getName()][2])) {
+        $perf .= strval($counterTuples[$counter->getName()][2]);
+    }
+    $perf .= ';';
+    if ($counter->getMin() !== null) {
+        $perf .= $counter->getMin();
+    }
+    $perf .= ';';
+    if ($counter->getMax() !== null) {
+        $perf .= $counter->getMax();
+    }
+    $performanceData[] = str_replace('|', '', rtrim($perf, ';'));
+}
+
+foreach ($counterTuples as $counter) {
+    if (!isset($workerCounters[$counter[0]])) {
+        $unknown = true;
+    }
+    $workerCounter = $workerCounters[$counter[0]];
+    if ($workerCounter->getValue() === null) {
+        $unknown = true;
+    }
+    if ($worker[1] !== null && !$worker[1]->contains($workerCounter->getValue())) {
+        $warning = true;
+    }
+    if ($worker[2] !== null && !$worker[2]->contains($workerCounter->getValue())) {
+        $critical = true;
+    }
+}
+
+$textStatus = array_filter(array_map('trim', explode(PHP_EOL, 'SHARED-WORKER ' . ($unknown ? 'UNKNOWN' : ($critical ? 'CRITICAL' : ($warning ? 'WARNING' : 'OK'))) . (empty($status->getTextStatus()) ? '' : (' - ' . str_replace('|', '', $status->getTextStatus()))))));
+$lines = $textStatus;
+if (count($performanceData) > 0) {
+    $lines[0] .= ' | ' . $performanceData[0];
+    if (count($performanceData) > 1) {
+        if (count($lines) == 1) {
+            $lines[] = '';
+        }
+        $lines[count($lines) - 1] .= ' | ' . $performanceData[1];
+        $lines = array_merge($lines, array_slice($performanceData, 2));
+    }
+}
+
+foreach ($lines as $line) {
+    $output->writeln($line);
+}
+exit($unknown ? 3 : ($critical ? 2 : ($warning ? 1 : 0)));

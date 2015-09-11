@@ -19,7 +19,8 @@
         "react/event-loop": ">=0.1 <0.5"
     },
     "suggest": {
-        "react/event-loop": "Allows spawning evented (and shared) workers"
+        "react/event-loop": "Allows spawning evented (and shared) workers",
+        "symfony/console": "For the standalone bin/check_shared_worker command"
     },
     "autoload": {
         "psr-4": {

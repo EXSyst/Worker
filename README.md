@@ -95,7 +95,7 @@ while ($busy > 0) {
 ## Shared workers
 A shared worker is an evented worker (see above) which can have multiple masters. Instead of communicating with a single master using its standard I/O streams, it listens on a socket, to which any master can connect and disconnect at any time.
 
-A shared worker can't be stopped just by disconnecting it from all of its masters. The only way to gracefully stop it is to send it an appropriate message containing its "stop cookie", which was configured in its bootstrap profile (see below). It can also be terminated by standard POSIX signals, but, in this case, it may leave some garbage behind.
+A shared worker can't be stopped just by disconnecting it from all of its masters. The only way to gracefully stop it is to send it an appropriate message containing its "admin cookie", which was configured in its bootstrap profile (see below). It can also be terminated by standard POSIX signals, but, in this case, it may leave some garbage behind.
 
 Here is a minimal example of a shared worker. As in the previous examples, ```use```s and ```require```s are skipped for brevity.
 
@@ -103,7 +103,7 @@ Here is a minimal example of a shared worker. As in the previous examples, ```us
 ```php
 <?php
 $wbsp = new WorkerBootstrapProfile();
-$wbsp->setStopCookie('This value is not so secret, change it in your app !');
+$wbsp->setAdminCookie('This value is not so secret, change it in your app !');
 $wf = new WorkerFactory($wbsp);
 if ($argc > 1 and $argv[1] == '--stop') {
   $wf->stopSharedWorker('unix://' . __DIR__ . '/Worker.sock');
@@ -133,6 +133,11 @@ class MySharedWorkerImpl implements SharedWorkerImplementationInterface
   public function onStop() { }
   public function terminate() { }
 
+  public function onQuery($privileged)
+  {
+    return 'Current counter value : ' . $this->i;
+  }
+
   public function onMessage($message, ChannelInterface $channel, $peerName)
   {
     $channel->sendMessage("Hello " . $message . " ! You're my " . self::ordinal(++$this->i) . " client.");
@@ -157,17 +162,24 @@ class MySharedWorkerImpl implements SharedWorkerImplementationInterface
 }
 ```
 
+## Querying a shared worker's status
+You can send a query message to your worker using ```$worker->query()``` or ```$workerFactory->querySharedWorker($socketAddress)```. If you have configured an "admin cookie" (see below), your worker can decide to return full information to clients which have it, and only limited information to others.
+
+Your worker's ```onQuery``` method can return null if your worker doesn't have any interesting status to report. Otherwise, it must return either a ```WorkerStatus``` (which encapsulates a human-readable string describing its status and/or counters with a name, a numerical value, and an optional unit, minimum and maximum), or just a human-readable string.
+
+This model is designed to ease interfacing with a monitoring system, such as Nagios. If you install [```symfony/console```](https://github.com/symfony/console), you can even use the standalone ```check_shared_worker``` command provided in this package, as a Nagios plugin.
+
 ## Gracefully stopping a shared worker
 The library provides two ways of gracefully stopping your shared workers :
 - You can call ```SharedWorker::stopCurrent()``` from inside your worker, and then manually clean up all the other resources ;
-- You can send an appropriate stop message to your worker using ```$worker->stop()``` or ```$workerFactory->stopSharedWorker($socketAddress)``` if you have configured a "stop cookie" (see below).
+- You can send an appropriate stop message to your worker using ```$worker->stop()``` or ```$workerFactory->stopSharedWorker($socketAddress)``` if you have configured an "admin cookie" (see below).
 
-If you use a "stop cookie", and if your shared worker owns resources (such as, for example, sub-worker pools, or [Ratchet](https://github.com/ratchetphp/Ratchet) server sockets) and has registered them against the event loop, it must, in its ```onStop``` method, either unregister them, or stop the loop : the loop will not stop automatically as long as any resources remain registered against it, which will make your shared worker unable to stop if you forget to unregister resources.
+If you use an "admin cookie", and if your shared worker owns resources (such as, for example, sub-worker pools, or [Ratchet](https://github.com/ratchetphp/Ratchet) server sockets) and has registered them against the event loop, it must, in its ```onStop``` method, either unregister them, or stop the loop : the loop will not stop automatically as long as any resources remain registered against it, which will make your shared worker unable to stop if you forget to unregister resources.
 
 ## Remote shared workers
 Shared workers support listening on Unix-domain sockets, as well as Internet-domain sockets. They can therefore be exposed to a network.
 
-A master can connect to a network-exposed shared worker on another machine, as well as stop it if it knows its "stop cookie", but it can't remotely start the shared worker.
+A master can connect to a network-exposed shared worker on another machine, as well as stop it if it knows its "admin cookie", but it can't remotely start the shared worker.
 
 **Warning : for security reasons, please do not use a ```SerializedChannelFactory``` (which is the default) on a network-exposed shared worker (see [```unserialize```](http://php.net/unserialize#refsect1-function.unserialize-notes) for more info). Instead, consider using a channel factory which uses a safe format, such as a ```JsonChannelFactory```.**
 
@@ -218,7 +230,7 @@ This object contains all the parameters needed to initialize a worker. The libra
 - The channel factory, which can create a channel, and must be serializable (by default, the ```SerializedChannelFactory``` from [```exsyst/io```](https://github.com/EXSyst/IO)) ;
 - The event loop expression which will be evaluated by the worker, after "stage 3" (by default, none, which will make the subprocess automatically call [```Factory::create()```](https://github.com/reactphp/event-loop/blob/master/src/Factory.php)) ;
 - The socket context expression which will be evaluated by the worker, after "stage 3" (by default, none, which will make the shared workers' server sockets be created without contexts) ;
-- The "stop cookie", which is a pre-shared secret string that must be sent to a shared worker as part of an appropriate message to make it gracefully stop (by default, none, which makes it impossible to gracefully stop a shared worker using this mechanism) ;
+- The "admin cookie", which is a pre-shared secret string that must be sent to a shared worker as part of an appropriate message to get extended status information from it, or make it gracefully stop (by default, none, which makes it impossible to gracefully stop a shared worker using this mechanism) ;
 - The kill switch path : the kill switch is a JSON file which indicates if shared workers are globally disabled, and if not, which specific shared workers, if any, are disabled (by default, none, which makes it impossible to disable shared workers) ;
 - The precompiled script map, which allows reusing the same script for every worker which uses the same implementation, instead of using a "generate in ```/tmp```, run once, then delete" approach (by default, none).
 

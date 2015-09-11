@@ -14,6 +14,7 @@ use EXSyst\Component\Worker\EventedWorkerImplementationInterface;
 use EXSyst\Component\Worker\Exception;
 use EXSyst\Component\Worker\RawWorkerImplementationInterface;
 use EXSyst\Component\Worker\SharedWorkerImplementationInterface;
+use EXSyst\Component\Worker\Status\WorkerStatus;
 use React\EventLoop\Factory;
 use React\EventLoop\LoopInterface;
 
@@ -22,7 +23,7 @@ final class WorkerRunner
     /**
      * @var string|null
      */
-    private static $stopCookie;
+    private static $adminCookie;
     /**
      * @var string|null
      */
@@ -56,14 +57,14 @@ final class WorkerRunner
     {
     }
 
-    public static function setStopCookie($stopCookie)
+    public static function setAdminCookie($adminCookie)
     {
-        self::$stopCookie = $stopCookie;
+        self::$adminCookie = $adminCookie;
     }
 
-    public static function getStopCookie()
+    public static function getAdminCookie()
     {
-        return self::$stopCookie;
+        return self::$adminCookie;
     }
 
     public static function setKillSwitchPath($killSwitchPath)
@@ -160,11 +161,18 @@ final class WorkerRunner
                         $workerImpl->onDisconnect($channel);
                         return;
                     }
-                    $isStop = self::isStopMessage($message);
-                    if ($isStop) {
-                        self::stopListening();
-                        $workerImpl->onStop();
-                    } elseif ($isStop !== null) {
+                    if (AdminEncoding::isStopMessage($message, self::$adminCookie, $privileged)) {
+                        if ($privileged) {
+                            self::stopListening();
+                            $workerImpl->onStop();
+                        }
+                    } elseif (AdminEncoding::isQueryMessage($message, self::$adminCookie, $privileged)) {
+                        $result = $workerImpl->onQuery($privileged);
+                        if (!($result instanceof WorkerStatus)) {
+                            $result = new WorkerStatus($result);
+                        }
+                        AdminEncoding::sendStatusMessage($channel, $result);
+                    } else {
                         $workerImpl->onMessage($message, $channel, $peerName);
                     }
                 });
@@ -176,40 +184,6 @@ final class WorkerRunner
             $workerImpl->terminate();
         } finally {
             self::stopListening();
-        }
-    }
-
-    private static function isStopMessage($message)
-    {
-        if ($message instanceof StopMessage) {
-            return (self::$stopCookie !== null && $message->getCookie() === self::$stopCookie) ? true : null;
-        } elseif ($message instanceof stdClass && isset($message->_stop_)) {
-            return (self::$stopCookie !== null && $message->_stop_ === self::$stopCookie) ? true : null;
-        } elseif (is_array($message) && isset($message['_stop_'])) {
-            return (self::$stopCookie !== null && $message['_stop_'] === self::$stopCookie) ? true : null;
-        } else {
-            return false;
-        }
-    }
-
-    public static function createServerSocket($socketAddress, &$errno, &$errstr, $socketContext = null)
-    {
-        if ($socketContext !== null) {
-            return @stream_socket_server($socketAddress, $errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $socketContext);
-        } else {
-            return @stream_socket_server($socketAddress, $errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN);
-        }
-    }
-
-    public static function createClientSocket($socketAddress, &$errno, &$errstr, $timeout = null, $socketContext = null)
-    {
-        if ($timeout === null) {
-            $timeout = intval(ini_get("default_socket_timeout"));
-        }
-        if ($socketContext !== null) {
-            return @stream_socket_client($socketAddress, $errno, $errstr, $timeout, STREAM_CLIENT_CONNECT, $socketContext);
-        } else {
-            return @stream_socket_client($socketAddress, $errno, $errstr, $timeout, STREAM_CLIENT_CONNECT);
         }
     }
 
@@ -229,24 +203,21 @@ final class WorkerRunner
                 mkdir($socketDir, 0777, true);
             }
         }
-        $server = self::createServerSocket($socketAddress, $errno, $errstr, self::$socketContext);
-        if ($server === false) {
-            if (strpos($errstr, 'Address already in use') !== false) {
-                $client = self::createClientSocket($socketAddress, $errno, $errstr, 1, self::$socketContext);
-                if ($client !== false) {
+        try {
+            $server = SocketFactory::createServerSocket($socketAddress, $errno, $errstr, self::$socketContext);
+        } catch (Exception\BindOrListenException $e) {
+            if (strpos($e->getMessage(), 'Address already in use') !== false && $socketFile !== null) {
+                try {
+                    fclose(SocketFactory::createClientSocket($socketAddress, 1, self::$socketContext));
                     // Really in use
-                    fclose($client);
-                    throw new Exception\RuntimeException("Can't create server socket : " . $errstr, $errno);
-                } else {
+                    throw $e;
+                } catch (Exception\ConnectException $e2) {
                     // False positive due to a residual socket file
                     unlink($socketFile);
-                    $server = self::createServerSocket($socketAddress, $errno, $errstr, self::$socketContext);
-                    if ($server === false) {
-                        throw new Exception\RuntimeException("Can't create server socket : " . $errstr, $errno);
-                    }
+                    $server = SocketFactory::createServerSocket($socketAddress, $errno, $errstr, self::$socketContext);
                 }
             } else {
-                throw new Exception\RuntimeException("Can't create server socket : " . $errstr, $errno);
+                throw $e;
             }
         }
         $lock->release();
