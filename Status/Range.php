@@ -45,15 +45,15 @@ class Range
     public static function fromString($str)
     {
         $src = CDataReader::fromString($str);
-        $inverted = $str->eat('@');
-        $num = $str->eatCSpan(':');
+        $inverted = $src->eat('@');
+        $num = $src->eatCSpan(':');
         if (empty($num) || $num == '~') {
             $num = null;
         } else {
             $num = floatval($num);
         }
-        if ($str->eat(':')) {
-            $max = $str->eatToFullConsumption();
+        if ($src->eat(':')) {
+            $max = $src->eatToFullConsumption();
             if (empty($max)) {
                 $max = null;
             } else {

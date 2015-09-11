@@ -204,7 +204,7 @@ final class WorkerRunner
             }
         }
         try {
-            $server = SocketFactory::createServerSocket($socketAddress, $errno, $errstr, self::$socketContext);
+            $server = SocketFactory::createServerSocket($socketAddress, self::$socketContext);
         } catch (Exception\BindOrListenException $e) {
             if (strpos($e->getMessage(), 'Address already in use') !== false && $socketFile !== null) {
                 try {
@@ -214,7 +214,7 @@ final class WorkerRunner
                 } catch (Exception\ConnectException $e2) {
                     // False positive due to a residual socket file
                     unlink($socketFile);
-                    $server = SocketFactory::createServerSocket($socketAddress, $errno, $errstr, self::$socketContext);
+                    $server = SocketFactory::createServerSocket($socketAddress, self::$socketContext);
                 }
             } else {
                 throw $e;

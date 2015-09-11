@@ -7,6 +7,7 @@ use EXSyst\Component\IO\Source\BufferedSource;
 use EXSyst\Component\IO\Channel\ChannelInterface;
 use EXSyst\Component\Worker\Bootstrap\WorkerBootstrapProfile;
 use EXSyst\Component\Worker\Internal\AdminEncoding;
+use EXSyst\Component\Worker\Internal\SocketFactory;
 use EXSyst\Component\Worker\Internal\WorkerRunner;
 
 class SharedWorker implements ChannelInterface
@@ -46,7 +47,7 @@ class SharedWorker implements ChannelInterface
 
     private static function connect($socketAddress, WorkerBootstrapProfile $bootstrapProfile, $timeout = null)
     {
-        $socket = WorkerRunner::createClientSocket($socketAddress, $timeout);
+        $socket = SocketFactory::createClientSocket($socketAddress, $timeout);
         $connection = Source::fromStream($socket, true, null, false);
 
         return $bootstrapProfile->getChannelFactory()->createChannel(new BufferedSource($connection), $connection);
@@ -67,7 +68,7 @@ class SharedWorker implements ChannelInterface
         static::startWithExpression($socketAddress, $bootstrapProfile, $bootstrapProfile->generateExpression($implementationClassName));
     }
 
-    public static function startWithExpression($socketAddress, WorkerBootstrapProfile $bootstrapProfile, $implementationExpression, Exception\ConnectException $e)
+    public static function startWithExpression($socketAddress, WorkerBootstrapProfile $bootstrapProfile, $implementationExpression, Exception\ConnectException $e = null)
     {
         if (!self::isLocalAddress($socketAddress)) {
             if ($e) {
