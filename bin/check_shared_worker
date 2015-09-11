@@ -34,11 +34,11 @@ if (!$autoloader) {
 require_once $autoloader;
 
 $inputDefinition = new InputDefinition();
-$inputDefinition->addOption('admin-cookie', 'a', InputOption::VALUE_REQUIRED, 'Admin cookie, to get full information from the worker');
-$inputDefinition->addOption('critical', 'c', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Critical thresholds (must be repeated exactly once for each counter)');
-$inputDefinition->addOption('counter', 'm', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Counters to use for checking warning/critical thresholds');
-$inputDefinition->addOption('warning', 'w', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Warning thresholds (must be repeated exactly once for each counter)');
-$inputDefinition->addArgument('socket-address', InputArgument::REQUIRED, 'Worker\'s socket address');
+$inputDefinition->addOption(new InputOption('admin-cookie', 'a', InputOption::VALUE_REQUIRED, 'Admin cookie, to get full information from the worker'));
+$inputDefinition->addOption(new InputOption('critical', 'c', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Critical thresholds (must be repeated exactly once for each counter)'));
+$inputDefinition->addOption(new InputOption('counter', 'm', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Counters to use for checking warning/critical thresholds'));
+$inputDefinition->addOption(new InputOption('warning', 'w', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Warning thresholds (must be repeated exactly once for each counter)'));
+$inputDefinition->addArgument(new InputArgument('socket-address', InputArgument::REQUIRED, 'Worker\'s socket address'));
 
 $input = new ArgvInput($argv, $inputDefinition);
 $output = new ConsoleOutput();
