@@ -1,6 +1,6 @@
 <?php
 
-namespace EXSyst\Component\Worker;
+namespace EXSyst\Component\Worker\Status;
 
 class WorkerCounter
 {
