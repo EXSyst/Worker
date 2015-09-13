@@ -7,17 +7,22 @@ use EXSyst\Component\IO\Source\BufferedSource;
 use EXSyst\Component\IO\Channel\ChannelInterface;
 use EXSyst\Component\Worker\Bootstrap\WorkerBootstrapProfile;
 use EXSyst\Component\Worker\Internal\AdminEncoding;
+use EXSyst\Component\Worker\Internal\IdentificationHelper;
 use EXSyst\Component\Worker\Internal\SocketFactory;
 use EXSyst\Component\Worker\Internal\WorkerRunner;
 
 class SharedWorker implements ChannelInterface
 {
+    private $socketAddress;
+    private $processId;
     private $channel;
     private $adminCookie;
     private $unreceivedMessages;
 
     protected function __construct($socketAddress, WorkerBootstrapProfile $bootstrapProfile, $implementationExpression = null, $autoStart = true)
     {
+        $this->socketAddress = $socketAddress;
+        $this->processId = false;
         $this->adminCookie = $bootstrapProfile->getAdminCookie();
         $this->unreceivedMessages = [];
         try {
@@ -70,7 +75,7 @@ class SharedWorker implements ChannelInterface
 
     public static function startWithExpression($socketAddress, WorkerBootstrapProfile $bootstrapProfile, $implementationExpression, Exception\ConnectException $e = null)
     {
-        if (!self::isLocalAddress($socketAddress)) {
+        if (!IdentificationHelper::isLocalAddress($socketAddress)) {
             if ($e) {
                 throw $e;
             } else {
@@ -90,6 +95,11 @@ class SharedWorker implements ChannelInterface
             }
             throw $e;
         }
+    }
+
+    public static function getWorkerProcessId($socketAddress)
+    {
+        return IdentificationHelper::getListeningProcessId($socketAddress);
     }
 
     public static function stopWorker($socketAddress, WorkerBootstrapProfile $bootstrapProfile)
@@ -127,24 +137,18 @@ class SharedWorker implements ChannelInterface
         WorkerRunner::stopListening();
     }
 
-    public static function isLocalAddress($socketAddress)
+    public function getSocketAddress()
     {
-        if (substr_compare($socketAddress, 'unix://', 0, 7) === 0) {
-            return true;
-        }
-        $localAddresses = array_merge([
-            '0.0.0.0',
-            '127.0.0.1',
-            '[::]',
-            '[::1]',
-        ], gethostbynamel(gethostname()));
-        foreach ($localAddresses as $address) {
-            if (strpos($socketAddress, $address) !== false) {
-                return true;
-            }
+        return $this->socketAddress;
+    }
+
+    public function getProcessId()
+    {
+        if ($this->processId === false) {
+            $this->processId = IdentificationHelper::getListeningProcessId($this->socketAddress);
         }
 
-        return false;
+        return $this->processId;
     }
 
     public function stop()

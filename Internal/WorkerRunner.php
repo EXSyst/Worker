@@ -196,7 +196,7 @@ final class WorkerRunner
                 throw new Exception\RuntimeException("This worker has been prevented from starting using the kill switch");
             }
         }
-        $socketFile = substr_compare($socketAddress, "unix://", 0, 7) ? null : substr($socketAddress, 7);
+        $socketFile = IdentificationHelper::getSocketFile($socketAddress);
         if ($socketFile !== null) {
             $socketDir = dirname($socketFile);
             if (!is_dir($socketDir)) {

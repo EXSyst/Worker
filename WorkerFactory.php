@@ -65,6 +65,11 @@ class WorkerFactory
         return $this;
     }
 
+    public function getSharedWorkerProcessId($socketAddress)
+    {
+        return SharedWorker::getWorkerProcessId($socketAddress);
+    }
+
     public function stopSharedWorker($socketAddress)
     {
         return SharedWorker::stopWorker($socketAddress, $this->bootstrapProfile);
