@@ -57,17 +57,32 @@ final class IdentificationHelper
         if ($exitCode !== 0 || $output === null) {
             return;
         }
-        $currentPid = 0;
+        if ($unix) {
+            return self::findProcessIdFromLsofOutput($output);
+        } else {
+            return self::findListeningProcessIdFromLsofOutput($output);
+        }
+    }
+
+    private static function findProcessIdFromLsofOutput($output)
+    {
         foreach ($output as $line) {
             if (substr_compare($line, 'p', 0, 1) === 0) {
-                $currentPid = intval(substr($line, 1));
-                if ($unix) {
-                    return $currentPid;
-                }
+                return intval(substr($line, 1));
+            }
+        }
+    }
+
+    private static function findListeningProcessIdFromLsofOutput($output)
+    {
+        $pid = null;
+        foreach ($output as $line) {
+            if (substr_compare($line, 'p', 0, 1) === 0) {
+                $pid = intval(substr($line, 1));
             }
             $record = explode("\0", $line);
             if (in_array('TST=LISTEN', $record)) {
-                return $currentPid;
+                return $pid;
             }
         }
     }
