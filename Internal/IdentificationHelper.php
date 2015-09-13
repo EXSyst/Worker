@@ -15,15 +15,18 @@ final class IdentificationHelper
 
     public static function isLocalAddress($socketAddress)
     {
+        static $localAddresses = null;
         if (self::isUnixAddress($socketAddress)) {
             return true;
         }
-        $localAddresses = array_merge([
-            '0.0.0.0',
-            '127.0.0.1',
-            '[::]',
-            '[::1]',
-        ], gethostbynamel(gethostname()));
+        if ($localAddresses === null) {
+            $localAddresses = array_merge([
+                '0.0.0.0',
+                '127.0.0.1',
+                '[::]',
+                '[::1]',
+            ], gethostbynamel(gethostname()));
+        }
         foreach ($localAddresses as $address) {
             if (strpos($socketAddress, $address) !== false) {
                 return true;
