@@ -203,23 +203,7 @@ final class WorkerRunner
                 mkdir($socketDir, 0777, true);
             }
         }
-        try {
-            $server = SocketFactory::createServerSocket($socketAddress, self::$socketContext);
-        } catch (Exception\BindOrListenException $e) {
-            if (strpos($e->getMessage(), 'Address already in use') !== false && $socketFile !== null) {
-                try {
-                    fclose(SocketFactory::createClientSocket($socketAddress, 1, self::$socketContext));
-                    // Really in use
-                    throw $e;
-                } catch (Exception\ConnectException $e2) {
-                    // False positive due to a residual socket file
-                    unlink($socketFile);
-                    $server = SocketFactory::createServerSocket($socketAddress, self::$socketContext);
-                }
-            } else {
-                throw $e;
-            }
-        }
+        $server = SocketFactory::createServerSocket($socketAddress, self::$socketContext);
         $lock->release();
         self::$socket = $server;
         self::$listening = true;

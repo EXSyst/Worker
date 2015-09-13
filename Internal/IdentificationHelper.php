@@ -54,7 +54,7 @@ final class IdentificationHelper
         $schemeless = self::stripScheme($socketAddress);
         $lsofArgs = $unix ? ('-F p0 '.escapeshellarg($schemeless)) : ('-F pT0 -i tcp@'.escapeshellarg($schemeless));
         exec('lsof '.$lsofArgs, $output, $exitCode);
-        if ($exitCode !== 0) {
+        if ($exitCode !== 0 || $output === null) {
             return;
         }
         $currentPid = 0;

@@ -10,7 +10,7 @@ final class SocketFactory
     {
     }
 
-    public static function createServerSocket($socketAddress, $socketContext = null)
+    private static function doCreateServerSocket($socketAddress, $socketContext = null)
     {
         set_error_handler(null);
         if ($socketContext !== null) {
@@ -24,6 +24,28 @@ final class SocketFactory
         }
 
         return $socket;
+    }
+
+    public static function createServerSocket($socketAddress, $socketContext = null)
+    {
+        try {
+            return self::doCreateServerSocket($socketAddress, $socketContext);
+        } catch (Exception\BindOrListenException $e) {
+            if (strpos($e->getMessage(), 'Address already in use') !== false && ($socketFile = IdentificationHelper::getSocketFile($socketAddress)) !== null) {
+                try {
+                    fclose(self::createClientSocket($socketAddress, 1, $socketContext));
+                    // Really in use
+                    throw $e;
+                } catch (Exception\ConnectException $e2) {
+                    // False positive due to a residual socket file
+                    unlink($socketFile);
+
+                    return self::doCreateServerSocket($socketAddress, $socketContext);
+                }
+            } else {
+                throw $e;
+            }
+        }
     }
 
     public static function createClientSocket($socketAddress, $timeout = null, $socketContext = null)
