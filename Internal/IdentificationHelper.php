@@ -33,6 +33,18 @@ final class IdentificationHelper
         return false;
     }
 
+    public static function isNetworkExposedAddress($socketAddress)
+    {
+        if (self::isUnixAddress($socketAddress)) {
+            return false;
+        }
+        if (strpos($socketAddress, '127.0.0.1') !== false || strpos($socketAddress, '[::1]') !== false) {
+            return false;
+        }
+
+        return true;
+    }
+
     public static function getSocketFile($socketAddress)
     {
         return self::isUnixAddress($socketAddress) ? substr($socketAddress, 7) : null;
