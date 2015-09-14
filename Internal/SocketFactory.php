@@ -10,6 +10,14 @@ final class SocketFactory
     {
     }
 
+    /**
+     * @param string        $socketAddress
+     * @param resource|null $socketContext
+     *
+     * @throws Exception\BindOrListenException
+     *
+     * @return resource
+     */
     private static function doCreateServerSocket($socketAddress, $socketContext = null)
     {
         set_error_handler(null);
@@ -26,6 +34,14 @@ final class SocketFactory
         return $socket;
     }
 
+    /**
+     * @param string        $socketAddress
+     * @param resource|null $socketContext
+     *
+     * @throws Exception\BindOrListenException
+     *
+     * @return resource
+     */
     public static function createServerSocket($socketAddress, $socketContext = null)
     {
         try {
@@ -48,6 +64,15 @@ final class SocketFactory
         }
     }
 
+    /**
+     * @param string        $socketAddress
+     * @param int|null      $timeout
+     * @param resource|null $socketContext
+     *
+     * @throws Exception\ConnectException
+     *
+     * @return resource
+     */
     public static function createClientSocket($socketAddress, $timeout = null, $socketContext = null)
     {
         if ($timeout === null) {

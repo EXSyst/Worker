@@ -13,6 +13,13 @@ final class AdminEncoding
     {
     }
 
+    /**
+     * @param mixed       $message
+     * @param string|null $adminCookie
+     * @param bool        $privileged
+     *
+     * @return bool
+     */
     public static function isStopMessage($message, $adminCookie, &$privileged)
     {
         if ($message instanceof StopMessage) {
@@ -32,6 +39,13 @@ final class AdminEncoding
         }
     }
 
+    /**
+     * @param mixed       $message
+     * @param string|null $adminCookie
+     * @param bool        $privileged
+     *
+     * @return bool
+     */
     public static function isQueryMessage($message, $adminCookie, &$privileged)
     {
         if ($message instanceof QueryMessage) {
@@ -51,6 +65,11 @@ final class AdminEncoding
         }
     }
 
+    /**
+     * @param mixed $message
+     *
+     * @return WorkerStatus|null
+     */
     public static function getStatusMessage($message)
     {
         if ($message instanceof WorkerStatus) {
@@ -64,7 +83,9 @@ final class AdminEncoding
 
     /**
      * @param ChannelInterface $channel
-     * @param string $adminCookie
+     * @param string           $adminCookie
+     *
+     * @throws Exception\RuntimeException
      */
     public static function sendStopMessage(ChannelInterface $channel, $adminCookie)
     {
@@ -73,7 +94,9 @@ final class AdminEncoding
 
     /**
      * @param ChannelInterface $channel
-     * @param string $adminCookie
+     * @param string           $adminCookie
+     *
+     * @throws Exception\RuntimeException
      */
     public static function sendQueryMessage(ChannelInterface $channel, $adminCookie)
     {
@@ -82,7 +105,9 @@ final class AdminEncoding
 
     /**
      * @param ChannelInterface $channel
-     * @param WorkerStatus $result
+     * @param WorkerStatus     $result
+     *
+     * @throws Exception\RuntimeException
      */
     public static function sendStatusMessage(ChannelInterface $channel, WorkerStatus $result)
     {

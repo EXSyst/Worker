@@ -13,12 +13,35 @@ use EXSyst\Component\Worker\Internal\WorkerRunner;
 
 class SharedWorker implements ChannelInterface
 {
+    /**
+     * @var string
+     */
     private $socketAddress;
+    /**
+     * @var false|int|null
+     */
     private $processId;
+    /**
+     * @var ChannelInterface
+     */
     private $channel;
+    /**
+     * @var string|null
+     */
     private $adminCookie;
+    /**
+     * @var array
+     */
     private $unreceivedMessages;
 
+    /**
+     * @param string                 $socketAddress
+     * @param WorkerBootstrapProfile $bootstrapProfile
+     * @param string|null            $implementationExpression
+     * @param bool                   $autoStart
+     *
+     * @throws Exception\ConnectException
+     */
     protected function __construct($socketAddress, WorkerBootstrapProfile $bootstrapProfile, $implementationExpression = null, $autoStart = true)
     {
         $this->socketAddress = $socketAddress;
@@ -50,6 +73,15 @@ class SharedWorker implements ChannelInterface
         }
     }
 
+    /**
+     * @param string                 $socketAddress
+     * @param WorkerBootstrapProfile $bootstrapProfile
+     * @param int|null               $timeout
+     *
+     * @throws Exception\ConnectException
+     *
+     * @return ChannelInterface
+     */
     private static function connect($socketAddress, WorkerBootstrapProfile $bootstrapProfile, $timeout = null)
     {
         $socket = SocketFactory::createClientSocket($socketAddress, $timeout);
@@ -58,21 +90,58 @@ class SharedWorker implements ChannelInterface
         return $bootstrapProfile->getChannelFactory()->createChannel(new BufferedSource($connection), $connection);
     }
 
+    /**
+     * @param string                 $socketAddress
+     * @param WorkerBootstrapProfile $bootstrapProfile
+     * @param string|null            $implementationClassName
+     * @param bool                   $autoStart
+     *
+     * @throws Exception\ConnectException
+     *
+     * @return static
+     */
     public static function withClass($socketAddress, WorkerBootstrapProfile $bootstrapProfile, $implementationClassName = null, $autoStart = true)
     {
         return new static($socketAddress, $bootstrapProfile, ($implementationClassName === null) ? null : $bootstrapProfile->generateExpression($implementationClassName), $autoStart);
     }
 
+    /**
+     * @param string                 $socketAddress
+     * @param WorkerBootstrapProfile $bootstrapProfile
+     * @param string|null            $implementationExpression
+     * @param bool                   $autoStart
+     *
+     * @throws Exception\ConnectException
+     *
+     * @return static
+     */
     public static function withExpression($socketAddress, WorkerBootstrapProfile $bootstrapProfile, $implementationExpression = null, $autoStart = true)
     {
         return new static($socketAddress, $bootstrapProfile, $implementationExpression, $autoStart);
     }
 
+    /**
+     * @param string                 $socketAddress
+     * @param WorkerBootstrapProfile $bootstrapProfile
+     * @param string                 $implementationClassName
+     *
+     * @throws Exception\ConnectException
+     * @throws Exception\LogicException
+     */
     public static function startWithClass($socketAddress, WorkerBootstrapProfile $bootstrapProfile, $implementationClassName)
     {
         static::startWithExpression($socketAddress, $bootstrapProfile, $bootstrapProfile->generateExpression($implementationClassName));
     }
 
+    /**
+     * @param string                          $socketAddress
+     * @param WorkerBootstrapProfile          $bootstrapProfile
+     * @param string                          $implementationExpression
+     * @param Exception\ConnectException|null $e
+     *
+     * @throws Exception\ConnectException
+     * @throws Exception\LogicException
+     */
     public static function startWithExpression($socketAddress, WorkerBootstrapProfile $bootstrapProfile, $implementationExpression, Exception\ConnectException $e = null)
     {
         if (!IdentificationHelper::isLocalAddress($socketAddress)) {
@@ -97,11 +166,27 @@ class SharedWorker implements ChannelInterface
         }
     }
 
+    /**
+     * @param string $socketAddress
+     *
+     * @throws Exception\RuntimeException
+     *
+     * @return int|null
+     */
     public static function getWorkerProcessId($socketAddress)
     {
         return IdentificationHelper::getListeningProcessId($socketAddress);
     }
 
+    /**
+     * @param string                 $socketAddress
+     * @param WorkerBootstrapProfile $bootstrapProfile
+     *
+     * @throws Exception\LogicException
+     * @throws Exception\RuntimeException
+     *
+     * @return bool
+     */
     public static function stopWorker($socketAddress, WorkerBootstrapProfile $bootstrapProfile)
     {
         $adminCookie = $bootstrapProfile->getAdminCookie();
@@ -118,6 +203,15 @@ class SharedWorker implements ChannelInterface
         return true;
     }
 
+    /**
+     * @param string                 $socketAddress
+     * @param WorkerBootstrapProfile $bootstrapProfile
+     *
+     * @throws Exception\LogicException
+     * @throws Exception\RuntimeException
+     *
+     * @return Status\WorkerStatus
+     */
     public static function queryWorker($socketAddress, WorkerBootstrapProfile $bootstrapProfile)
     {
         $adminCookie = $bootstrapProfile->getAdminCookie();
@@ -137,11 +231,19 @@ class SharedWorker implements ChannelInterface
         WorkerRunner::stopListening();
     }
 
+    /**
+     * @return string
+     */
     public function getSocketAddress()
     {
         return $this->socketAddress;
     }
 
+    /**
+     * @throws Exception\RuntimeException
+     *
+     * @return int|null
+     */
     public function getProcessId()
     {
         if ($this->processId === false) {
@@ -151,6 +253,12 @@ class SharedWorker implements ChannelInterface
         return $this->processId;
     }
 
+    /**
+     * @throws Exception\LogicException
+     * @throws Exception\RuntimeException
+     *
+     * @return bool
+     */
     public function stop()
     {
         if ($this->adminCookie === null) {
@@ -161,6 +269,11 @@ class SharedWorker implements ChannelInterface
         return $this;
     }
 
+    /**
+     * @throws Exception\RuntimeException
+     *
+     * @return Status\WorkerStatus
+     */
     public function query()
     {
         AdminEncoding::sendQueryMessage($this->channel, $this->adminCookie);
@@ -206,21 +319,39 @@ class SharedWorker implements ChannelInterface
         return $this->channel->receiveMessage();
     }
 
+    /**
+     * @throws Exception\RuntimeException
+     *
+     * @return mixed
+     */
     public function receiveMessageDirectly()
     {
         return $this->channel->receiveMessage();
     }
 
+    /**
+     * @return int
+     */
     public function getUnreceivedMessageCount()
     {
         return count($this->unreceivedMessages);
     }
 
+    /**
+     * @return array
+     */
     public function peekUnreceivedMessages()
     {
         return $this->unreceivedMessages;
     }
 
+    /**
+     * @param int $index
+     *
+     * @throws Exception\OutOfRangeException
+     *
+     * @return $this
+     */
     public function removeUnreceivedMessage($index)
     {
         if ($index < 0 || $index >= count($this->unreceivedMessages)) {
@@ -231,6 +362,11 @@ class SharedWorker implements ChannelInterface
         return $this;
     }
 
+    /**
+     * @param mixed $message
+     *
+     * @return $this
+     */
     public function unreceiveMessage($message)
     {
         $this->unreceivedMessages[] = $message;

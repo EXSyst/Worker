@@ -56,31 +56,49 @@ final class WorkerRunner
     {
     }
 
+    /**
+     * @param string|null $adminCookie
+     */
     public static function setAdminCookie($adminCookie)
     {
         self::$adminCookie = $adminCookie;
     }
 
+    /**
+     * @return string|null
+     */
     public static function getAdminCookie()
     {
         return self::$adminCookie;
     }
 
+    /**
+     * @param string|null $killSwitchPath
+     */
     public static function setKillSwitchPath($killSwitchPath)
     {
         self::$killSwitchPath = $killSwitchPath;
     }
 
+    /**
+     * @return string|null
+     */
     public static function getKillSwitchPath()
     {
         return self::$killSwitchPath;
     }
 
+    /**
+     * @param LoopInterface $loop
+     */
     public static function setLoop(LoopInterface $loop)
     {
         self::$loop = $loop;
     }
 
+    /**
+     * @return LoopInterface
+     */
     public static function getLoop()
     {
         if (self::$loop === null) {
@@ -89,11 +107,17 @@ final class WorkerRunner
         return self::$loop;
     }
 
+    /**
+     * @param ChannelFactoryInterface $channelFactory
+     */
     public static function setChannelFactory(ChannelFactoryInterface $channelFactory)
     {
         self::$channelFactory = $channelFactory;
     }
 
+    /**
+     * @return ChannelFactoryInterface
+     */
     public static function getChannelFactory()
     {
         if (self::$channelFactory === null) {
@@ -102,6 +126,9 @@ final class WorkerRunner
         return self::$channelFactory;
     }
 
+    /**
+     * @param resource|null $socketContext
+     */
     public static function setSocketContext($socketContext)
     {
         if ($socketContext !== null && !is_resource($socketContext)) {
@@ -110,11 +137,19 @@ final class WorkerRunner
         self::$socketContext = $socketContext;
     }
 
+    /**
+     * @return resource|null
+     */
     public static function getSocketContext()
     {
         return self::$socketContext;
     }
 
+    /**
+     * @param RawWorkerImplementationInterface|EventedWorkerImplementationInterface $workerImpl
+     *
+     * @throws Exception\InvalidArgumentException
+     */
     public static function runDedicatedWorker($workerImpl)
     {
         $channel = self::getChannelFactory()->createChannel(Source::fromInput(), Sink::fromOutput());
@@ -142,6 +177,13 @@ final class WorkerRunner
         }
     }
 
+    /**
+     * @param SharedWorkerImplementationInterface $workerImpl
+     * @param string $socketAddress
+     *
+     * @throws Exception\BindOrListenException
+     * @throws Exception\RuntimeException
+     */
     public static function runSharedWorker(SharedWorkerImplementationInterface $workerImpl, $socketAddress)
     {
         $server = self::startListening($socketAddress);
@@ -188,6 +230,14 @@ final class WorkerRunner
         }
     }
 
+    /**
+     * @param string $socketAddress
+     *
+     * @throws Exception\BindOrListenException
+     * @throws Exception\RuntimeException
+     *
+     * @return resource
+     */
     private static function startListening($socketAddress)
     {
         $lock = Lock::acquire();

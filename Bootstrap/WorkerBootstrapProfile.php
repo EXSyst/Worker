@@ -69,6 +69,9 @@ class WorkerBootstrapProfile
      */
     private $precompiledScripts;
 
+    /**
+     * @param bool $withAutoloader
+     */
     public function __construct($withAutoloader = true)
     {
         $this->phpExecutablePath = null;
@@ -87,28 +90,51 @@ class WorkerBootstrapProfile
         $this->precompiledScripts = [];
     }
 
+    /**
+     * @param bool $withAutoloader
+     *
+     * @return self
+     */
     public static function create($withAutoloader = true)
     {
         return new self($withAutoloader);
     }
 
+    /**
+     * @param string|null $phpExecutablePath
+     *
+     * @return $this
+     */
     public function setPhpExecutablePath($phpExecutablePath)
     {
         $this->phpExecutablePath = $phpExecutablePath;
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
     public function getPhpExecutablePath()
     {
         return $this->phpExecutablePath;
     }
 
+    /**
+     * @param array|null $phpArguments
+     *
+     * @return $this
+     */
     public function setPhpArguments(array $phpArguments = null)
     {
         $this->phpArguments = $phpArguments;
         return $this;
     }
 
+    /**
+     * @param string $phpArgument
+     *
+     * @return $this
+     */
     public function addPhpArgument($phpArgument)
     {
         if ($this->phpArguments === null) {
@@ -118,11 +144,20 @@ class WorkerBootstrapProfile
         return $this;
     }
 
+    /**
+     * @return array|null
+     */
     public function getPhpArguments()
     {
         return $this->phpArguments;
     }
 
+    /**
+     * @param string|null $phpExecutablePath
+     * @param array|null $phpArguments
+     *
+     * @return $this
+     */
     public function getOrFindPhpExecutablePathAndArguments(&$phpExecutablePath, &$phpArguments)
     {
         $phpExecutablePath = $this->phpExecutablePath;
@@ -142,203 +177,376 @@ class WorkerBootstrapProfile
         return $this;
     }
 
+    /**
+     * @param array $stage1Parts
+     *
+     * @return $this
+     */
     public function setStage1Parts(array $stage1Parts = [])
     {
         $this->stage1Parts = $stage1Parts;
         return $this;
     }
 
+    /**
+     * @param string $stage1Part
+     *
+     * @return $this
+     */
     public function addStage1Part($stage1Part)
     {
         $this->stage1Parts[] = $stage1Part;
         return $this;
     }
 
+    /**
+     * @param string $name
+     * @param string $expr
+     *
+     * @return $this
+     */
     public function addStage1GlobalVariableWithExpression($name, $expr)
     {
         return $this->addStage1Part('$' . $name . ' = ' . $expr . ';');
     }
 
+    /**
+     * @param string $name
+     * @param mixed $value
+     *
+     * @return $this
+     */
     public function addStage1GlobalVariableWithValue($name, $value)
     {
         return $this->addStage1GlobalVariableWithExpression($name, self::exportPhpValue($value));
     }
 
+    /**
+     * @return array
+     */
     public function getStage1Parts()
     {
         return $this->stage1Parts;
     }
 
+    /**
+     * @param array $scriptsToRequire
+     *
+     * @return $this
+     */
     public function setScriptsToRequire(array $scriptsToRequire = [])
     {
         $this->scriptsToRequire = $scriptsToRequire;
         return $this;
     }
 
+    /**
+     * @param string $scriptToRequire
+     *
+     * @return $this
+     */
     public function addScriptToRequire($scriptToRequire)
     {
         $this->scriptsToRequire[] = $scriptToRequire;
         return $this;
     }
 
+    /**
+     * @return array
+     */
     public function getScriptsToRequire()
     {
         return $this->scriptsToRequire;
     }
 
+    /**
+     * @param array $stage2Parts
+     *
+     * @return $this
+     */
     public function setStage2Parts(array $stage2Parts = [])
     {
         $this->stage2Parts = $stage2Parts;
         return $this;
     }
 
+    /**
+     * @param string $stage2Part
+     *
+     * @return $this
+     */
     public function addStage2Part($stage2Part)
     {
         $this->stage2Parts[] = $stage2Part;
         return $this;
     }
 
+    /**
+     * @param string $name
+     * @param string $expr
+     *
+     * @return $this
+     */
     public function addStage2GlobalVariableWithExpression($name, $expr)
     {
         return $this->addStage2Part('$' . $name . ' = ' . $expr . ';');
     }
 
+    /**
+     * @param string $name
+     * @param mixed $value
+     *
+     * @return $this
+     */
     public function addStage2GlobalVariableWithValue($name, $value)
     {
         return $this->addStage2GlobalVariableWithExpression($name, self::exportPhpValue($value));
     }
 
+    /**
+     * @return array
+     */
     public function getStage2Parts()
     {
         return $this->stage2Parts;
     }
 
+    /**
+     * @param string $variableName
+     *
+     * @return $this
+     */
     public function setVariableName($variableName)
     {
         $this->variableName = $variableName;
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function getVariableName()
     {
         return $this->variableName;
     }
 
+    /**
+     * @param array $constructorArguments
+     *
+     * @return $this
+     */
     public function setConstructorArguments(array $constructorArguments = [])
     {
         $this->constructorArguments = $constructorArguments;
         return $this;
     }
 
+    /**
+     * @param string $expression
+     *
+     * @return $this
+     */
     public function addConstructorArgumentWithExpression($expression)
     {
         $this->constructorArguments[] = $expression;
         return $this;
     }
 
+    /**
+     * @param mixed $value
+     *
+     * @return $this
+     */
     public function addConstructorArgumentWithValue($value)
     {
         return $this->addConstructorArgumentWithExpression(self::exportPhpValue($value));
     }
 
+    /**
+     * @return array
+     */
     public function getConstructorArguments()
     {
         return $this->constructorArguments;
     }
 
+    /**
+     * @param array $stage3Parts
+     *
+     * @return $this
+     */
     public function setStage3Parts(array $stage3Parts = [])
     {
         $this->stage3Parts = $stage3Parts;
         return $this;
     }
 
+    /**
+     * @param string $stage3Part
+     *
+     * @return $this
+     */
     public function addStage3Part($stage3Part)
     {
         $this->stage3Parts[] = $stage3Part;
         return $this;
     }
 
+    /**
+     * @param string $name
+     * @param string $expr
+     *
+     * @return $this
+     */
     public function addStage3GlobalVariableWithExpression($name, $expr)
     {
         return $this->addStage3Part('$' . $name . ' = ' . $expr . ';');
     }
 
+    /**
+     * @param string $name
+     * @param mixed $value
+     *
+     * @return $this
+     */
     public function addStage3GlobalVariableWithValue($name, $value)
     {
         return $this->addStage3GlobalVariableWithExpression($name, self::exportPhpValue($value));
     }
 
+    /**
+     * @return array
+     */
     public function getStage3Parts()
     {
         return $this->stage3Parts;
     }
 
+    /**
+     * @param ChannelFactoryInterface $channelFactory
+     *
+     * @return $this
+     */
     public function setChannelFactory(ChannelFactoryInterface $channelFactory)
     {
         $this->channelFactory = $channelFactory;
         return $this;
     }
 
+    /**
+     * @return ChannelFactoryInterface
+     */
     public function getChannelFactory()
     {
         return $this->channelFactory;
     }
 
+    /**
+     * @param string|null
+     *
+     * @return $this
+     */
     public function setLoopExpression($loopExpression)
     {
         $this->loopExpression = $loopExpression;
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
     public function getLoopExpression()
     {
         return $this->loopExpression;
     }
 
+    /**
+     * @param string|null
+     *
+     * @return $this
+     */
     public function setSocketContextExpression($socketContextExpression)
     {
         $this->socketContextExpression = $socketContextExpression;
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
     public function getSocketContextExpression()
     {
         return $this->socketContextExpression;
     }
 
+    /**
+     * @param string|null
+     *
+     * @return $this
+     */
     public function setAdminCookie($adminCookie)
     {
         $this->adminCookie = $adminCookie;
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
     public function getAdminCookie()
     {
         return $this->adminCookie;
     }
 
+    /**
+     * @param string|null
+     *
+     * @return $this
+     */
     public function setKillSwitchPath($killSwitchPath)
     {
         $this->killSwitchPath = $killSwitchPath;
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
     public function getKillSwitchPath()
     {
         return $this->killSwitchPath;
     }
 
+    /**
+     * @param array $precompiledScripts
+     *
+     * @return $this
+     */
     public function setPrecompiledScripts(array $precompiledScripts)
     {
         $this->precompiledScripts = $precompiledScripts;
         return $this;
     }
 
+    /**
+     * @param string $className
+     * @param string $scriptPath
+     * @param string|null $socketAddress
+     *
+     * @return $this
+     */
     public function addPrecompiledScript($className, $scriptPath, $socketAddress = null)
     {
         return $this->addPrecompiledScriptWithExpression($this->generateExpression($className), $scriptPath, $socketAddress);
     }
 
+    /**
+     * @param string $expression
+     * @param string $scriptPath
+     * @param string|null $socketAddress
+     *
+     * @return $this
+     */
     public function addPrecompiledScriptWithExpression($expression, $scriptPath, $socketAddress = null)
     {
         $expression = self::combineExpressionWithSocketAddress($expression, $socketAddress);
@@ -346,27 +554,58 @@ class WorkerBootstrapProfile
         return $this;
     }
 
+    /**
+     * @return array
+     */
     public function getPrecompiledScripts()
     {
         return $this->precompiledScripts;
     }
 
+    /**
+     * @param string $className
+     * @param string|null $socketAddress
+     *
+     * @return string|null
+     */
     public function getPrecompiledScript($className, $socketAddress = null)
     {
         return $this->getPrecompiledScriptWithExpression($this->generateExpression($className), $socketAddress);
     }
 
+    /**
+     * @param string $expression
+     * @param string|null $socketAddress
+     *
+     * @return string|null
+     */
     public function getPrecompiledScriptWithExpression($expression, $socketAddress = null)
     {
         $expression = self::combineExpressionWithSocketAddress($expression, $socketAddress);
         return isset($this->precompiledScripts[$expression]) ? $this->precompiledScripts[$expression] : null;
     }
 
+    /**
+     * @param string $className
+     * @param string|null $socketAddress
+     * @param string $scriptPath
+     * @param bool $mustDeleteScriptOnError
+     *
+     * @return $this
+     */
     public function compileScript($className, $socketAddress, &$scriptPath, &$mustDeleteScriptOnError)
     {
         return $this->compileScriptWithExpression($this->generateExpression($className), $socketAddress, $scriptPath, $mustDeleteScriptOnError);
     }
 
+    /**
+     * @param string $expression
+     * @param string|null $socketAddress
+     * @param string $scriptPath
+     * @param bool $mustDeleteScriptOnError
+     *
+     * @return $this
+     */
     public function compileScriptWithExpression($expression, $socketAddress, &$scriptPath, &$mustDeleteScriptOnError)
     {
         $scriptPath = $this->getPrecompiledScriptWithExpression($expression, $socketAddress);
@@ -387,11 +626,22 @@ class WorkerBootstrapProfile
         return $this;
     }
 
+    /**
+     * @param string $className
+     *
+     * @return string
+     */
     public function generateExpression($className)
     {
         return 'new ' . $className . '(' . implode(', ', $this->constructorArguments) . ')';
     }
 
+    /**
+     * @param string $expression
+     * @param string|null $socketAddress
+     *
+     * @return string
+     */
     public static function combineExpressionWithSocketAddress($expression, $socketAddress = null)
     {
         if ($socketAddress !== null) {
@@ -401,11 +651,23 @@ class WorkerBootstrapProfile
         return $expression;
     }
 
+    /**
+     * @param string $className
+     * @param string|null $socketAddress
+     *
+     * @return string
+     */
     public function generateScript($className, $socketAddress = null)
     {
         return $this->generateScriptWithExpression($this->generateExpression($className), $socketAddress);
     }
 
+    /**
+     * @param string $expression
+     * @param string|null $socketAddress
+     *
+     * @return string
+     */
     public function generateScriptWithExpression($expression, $socketAddress = null)
     {
         return '<?php' . PHP_EOL .
@@ -434,6 +696,11 @@ class WorkerBootstrapProfile
                 : (WorkerRunner::class . '::runSharedWorker($' . $this->variableName . ', ' . self::exportPhpValue($socketAddress) . ');'));
     }
 
+    /**
+     * @param mixed $value
+     *
+     * @return string
+     */
     public static function exportPhpValue($value)
     {
         switch (gettype($value)) {

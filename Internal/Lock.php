@@ -32,6 +32,9 @@ final class Lock
         $this->release();
     }
 
+    /**
+     * @return self
+     */
     public static function acquire()
     {
         return new self();

@@ -6,9 +6,19 @@ use EXSyst\Component\Worker\Exception;
 
 class WorkerStatus
 {
+    /**
+     * @var string|null
+     */
     private $textStatus;
+    /**
+     * @var array
+     */
     private $counters;
 
+    /**
+     * @param string|null $textStatus
+     * @param array       $counters
+     */
     public function __construct($textStatus = null, array $counters = [])
     {
         foreach ($counters as $counter) {
@@ -20,16 +30,25 @@ class WorkerStatus
         $this->counters = $counters;
     }
 
+    /**
+     * @return string|null
+     */
     public function getTextStatus()
     {
         return $this->textStatus;
     }
 
+    /**
+     * @return array
+     */
     public function getCounters()
     {
         return $this->counters;
     }
 
+    /**
+     * @return array
+     */
     public function toArray()
     {
         return [
@@ -40,6 +59,11 @@ class WorkerStatus
         ];
     }
 
+    /**
+     * @param array|object $arrayOrObject
+     *
+     * @return static
+     */
     public static function fromArrayOrObject($arrayOrObject)
     {
         if (is_array($arrayOrObject)) {

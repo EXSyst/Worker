@@ -16,6 +16,9 @@ class KillSwitch
      */
     private $data;
 
+    /**
+     * @param string $path
+     */
     public function __construct($path)
     {
         $this->path = $path;
@@ -32,11 +35,19 @@ class KillSwitch
         $this->data = $data;
     }
 
+    /**
+     * @return string
+     */
     public function getPath()
     {
         return $this->path;
     }
 
+    /**
+     * @throws Exception\RuntimeException
+     *
+     * @return $this
+     */
     public function save()
     {
         $dir = dirname($this->path);
@@ -50,6 +61,11 @@ class KillSwitch
         return $this;
     }
 
+    /**
+     * @param bool $global
+     *
+     * @return $this
+     */
     public function setGlobal($global)
     {
         $this->data->global = $global;
@@ -57,11 +73,19 @@ class KillSwitch
         return $this;
     }
 
+    /**
+     * @return bool
+     */
     public function getGlobal()
     {
         return $this->data->global;
     }
 
+    /**
+     * @param array $addresses
+     *
+     * @return $this
+     */
     public function setAddresses(array $addresses)
     {
         $this->data->addresses = $addresses;
@@ -69,6 +93,11 @@ class KillSwitch
         return $this;
     }
 
+    /**
+     * @param string $address
+     *
+     * @return $this
+     */
     public function addAddress($address)
     {
         if (!$this->hasAddress($address)) {
@@ -78,6 +107,11 @@ class KillSwitch
         return $this;
     }
 
+    /**
+     * @param string $address
+     *
+     * @return $this
+     */
     public function removeAddress($address)
     {
         $key = array_search($address, $this->data->addresses, true);
@@ -88,11 +122,19 @@ class KillSwitch
         return $this;
     }
 
+    /**
+     * @return array
+     */
     public function getAddresses()
     {
         return $this->data->addresses;
     }
 
+    /**
+     * @param string $address
+     *
+     * @return bool
+     */
     public function hasAddress($address)
     {
         return array_search($address, $this->data->addresses, true) !== false;

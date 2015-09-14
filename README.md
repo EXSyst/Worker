@@ -4,6 +4,11 @@
 # EXSyst Worker Component
 Worker subprocess management
 
+## Operating system compatibility
+This library uses Unix-specific utilities, such as ```lsof``` (for finding the process ID of a shared worker) and ```getconf``` (for querying the processor count, if you use the automatic worker pool sizing). If you use these features, please ensure that these programs are installed and executable by PHP.
+
+This library is **unsupported on Windows**.
+
 ## Dedicated workers
 A dedicated worker is the simplest worker type. It has only one master, and its communication channel is closed (which should stop it as soon as it has finished processing its messages) when its master's reference to it goes out of scope. It allows to run code in isolation from the master.
 

@@ -16,8 +16,19 @@ use EXSyst\Component\Worker\Exception;
 
 class WorkerPool implements ArrayAccess, Countable, IteratorAggregate
 {
+    /**
+     * @var array
+     */
     private $workers;
 
+    /**
+     * @param WorkerBootstrapProfile $bootstrapProfile
+     * @param string $implementationExpression
+     * @param int|null $workerCount
+     *
+     * @throws Exception\InvalidArgumentException
+     * @throws Exception\RuntimeException
+     */
     protected function __construct(WorkerBootstrapProfile $bootstrapProfile, $implementationExpression, $workerCount = null)
     {
         $workerCount = ($workerCount === null) ? self::getProcessorCount() : intval($workerCount);
@@ -30,22 +41,52 @@ class WorkerPool implements ArrayAccess, Countable, IteratorAggregate
         }
     }
 
+    /**
+     * @param WorkerBootstrapProfile $bootstrapProfile
+     * @param string $implementationClassName
+     * @param int|null $workerCount
+     *
+     * @throws Exception\InvalidArgumentException
+     * @throws Exception\RuntimeException
+     *
+     * @return static
+     */
     public static function withClass(WorkerBootstrapProfile $bootstrapProfile, $implementationClassName, $workerCount = null)
     {
         return new static($bootstrapProfile, $bootstrapProfile->generateExpression($implementationClassName), $workerCount);
     }
 
+    /**
+     * @param WorkerBootstrapProfile $bootstrapProfile
+     * @param string $implementationExpression
+     * @param int|null $workerCount
+     *
+     * @throws Exception\InvalidArgumentException
+     * @throws Exception\RuntimeException
+     *
+     * @return static
+     */
     public static function withExpression(WorkerBootstrapProfile $bootstrapProfile, $implementationExpression, $workerCount = null)
     {
         return new static($bootstrapProfile, $implementationExpression, $workerCount);
     }
 
+    /**
+     * @throws Exception\RuntimeException
+     *
+     * @return int
+     */
     public static function getProcessorCount()
     {
         $getconfPath = self::findGetconf();
         return intval(trim(shell_exec(escapeshellarg($getconfPath).' _NPROCESSORS_ONLN')));
     }
 
+    /**
+     * @throws Exception\RuntimeException
+     *
+     * @return string
+     */
     private static function findGetconf()
     {
         $finder = new ExecutableFinder();
@@ -57,31 +98,58 @@ class WorkerPool implements ArrayAccess, Countable, IteratorAggregate
         return $getconfPath;
     }
 
+    /**
+     * @param int $offset
+     *
+     * @return bool
+     */
     public function offsetExists($offset)
     {
         return isset($this->workers[$offset]);
     }
 
+    /**
+     * @param int $offset
+     *
+     * @return Worker
+     */
     public function offsetGet($offset)
     {
         return $this->workers[$offset];
     }
 
+    /**
+     * @param int $offset
+     * @param mixed $value
+     *
+     * @throws Exception\LogicException Always
+     */
     public function offsetSet($offset, $value)
     {
         throw new Exception\LogicException("A WorkerPool is a read-only container");
     }
 
+    /**
+     * @param int $offset
+     *
+     * @throws Exception\LogicException Always
+     */
     public function offsetUnset($offset)
     {
         throw new Exception\LogicException("A WorkerPool is a read-only container");
     }
 
+    /**
+     * @return int
+     */
     public function count()
     {
         return count($this->workers);
     }
 
+    /**
+     * @return \Iterator
+     */
     public function getIterator()
     {
         foreach ($this->workers as $i => $worker) {
@@ -89,6 +157,13 @@ class WorkerPool implements ArrayAccess, Countable, IteratorAggregate
         }
     }
 
+    /**
+     * @param Worker $worker
+     *
+     * @throws Exception\RuntimeException
+     *
+     * @return mixed
+     */
     public function receiveMessage(&$worker)
     {
         $workers = $this->workers;
@@ -100,6 +175,13 @@ class WorkerPool implements ArrayAccess, Countable, IteratorAggregate
         return $worker->receiveMessage();
     }
 
+    /**
+     * @param LoopInterface $loop
+     * @param callable $listener
+     * @param bool $once
+     *
+     * @return $this
+     */
     public function registerRead(LoopInterface $loop, callable $listener, $once = false)
     {
         if ($once) {
@@ -119,6 +201,11 @@ class WorkerPool implements ArrayAccess, Countable, IteratorAggregate
         return $this;
     }
 
+    /**
+     * @param LoopInterface $loop
+     *
+     * @return $this
+     */
     public function unregisterRead(LoopInterface $loop)
     {
         foreach ($this->workers as $worker) {

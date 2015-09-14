@@ -9,9 +9,19 @@ use EXSyst\Component\Worker\Bootstrap\WorkerBootstrapProfile;
 
 class Worker implements ChannelInterface
 {
+    /**
+     * @var resource
+     */
     private $process;
+    /**
+     * @var ChannelInterface
+     */
     private $channel;
 
+    /**
+     * @param WorkerBootstrapProfile $bootstrapProfile
+     * @param string                 $implementationExpression
+     */
     protected function __construct(WorkerBootstrapProfile $bootstrapProfile, $implementationExpression)
     {
         $bootstrapProfile->getOrFindPhpExecutablePathAndArguments($php, $phpArgs);
@@ -51,11 +61,23 @@ class Worker implements ChannelInterface
         proc_close($this->process);
     }
 
+    /**
+     * @param WorkerBootstrapProfile $bootstrapProfile
+     * @param string                 $implementationClassName
+     *
+     * @return static
+     */
     public static function withClass(WorkerBootstrapProfile $bootstrapProfile, $implementationClassName)
     {
         return new static($bootstrapProfile, $bootstrapProfile->generateExpression($implementationClassName));
     }
 
+    /**
+     * @param WorkerBootstrapProfile $bootstrapProfile
+     * @param string                 $implementationExpression
+     *
+     * @return static
+     */
     public static function withExpression(WorkerBootstrapProfile $bootstrapProfile, $implementationExpression)
     {
         return new static($bootstrapProfile, $implementationExpression);

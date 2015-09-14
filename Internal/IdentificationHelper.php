@@ -11,11 +11,21 @@ final class IdentificationHelper
     {
     }
 
+    /**
+     * @param string $socketAddress
+     *
+     * @return bool
+     */
     public static function isUnixAddress($socketAddress)
     {
         return substr_compare($socketAddress, 'unix://', 0, 7) === 0;
     }
 
+    /**
+     * @param string $socketAddress
+     *
+     * @return bool
+     */
     public static function isLocalAddress($socketAddress)
     {
         static $localAddresses = null;
@@ -39,6 +49,11 @@ final class IdentificationHelper
         return false;
     }
 
+    /**
+     * @param string $socketAddress
+     *
+     * @return bool
+     */
     public static function isNetworkExposedAddress($socketAddress)
     {
         if (self::isUnixAddress($socketAddress)) {
@@ -51,11 +66,21 @@ final class IdentificationHelper
         return true;
     }
 
+    /**
+     * @param string $socketAddress
+     *
+     * @return string|null
+     */
     public static function getSocketFile($socketAddress)
     {
         return self::isUnixAddress($socketAddress) ? substr($socketAddress, 7) : null;
     }
 
+    /**
+     * @param string $socketAddress
+     *
+     * @return string
+     */
     public static function stripScheme($socketAddress)
     {
         $pos = strpos($socketAddress, '://');
@@ -63,6 +88,13 @@ final class IdentificationHelper
         return ($pos === false) ? $socketAddress : substr($socketAddress, $pos + 3);
     }
 
+    /**
+     * @param string $socketAddress
+     *
+     * @throws Exception\RuntimeException
+     *
+     * @return int|null
+     */
     public static function getListeningProcessId($socketAddress)
     {
         if (!self::isLocalAddress($socketAddress)) {
@@ -82,6 +114,11 @@ final class IdentificationHelper
         }
     }
 
+    /**
+     * @throws Exception\RuntimeException
+     *
+     * @return string
+     */
     private static function findLsof()
     {
         $finder = new ExecutableFinder();
@@ -93,6 +130,12 @@ final class IdentificationHelper
         return $lsofPath;
     }
 
+    /**
+     * @param string $socketAddress
+     * @param bool   $unix
+     *
+     * @return string
+     */
     private static function buildLsofArgs($socketAddress, $unix)
     {
         $schemeless = self::stripScheme($socketAddress);
@@ -100,6 +143,11 @@ final class IdentificationHelper
         return $unix ? ('-F p0 '.escapeshellarg($schemeless)) : ('-F pT0 -i tcp@'.escapeshellarg($schemeless));
     }
 
+    /**
+     * @param array $output
+     *
+     * @return int|null
+     */
     private static function findProcessIdFromLsofOutput(array $output)
     {
         foreach ($output as $line) {
@@ -109,6 +157,11 @@ final class IdentificationHelper
         }
     }
 
+    /**
+     * @param array $output
+     *
+     * @return int|null
+     */
     private static function findListeningProcessIdFromLsofOutput(array $output)
     {
         $pid = null;

@@ -4,12 +4,18 @@ namespace EXSyst\Component\Worker\Bootstrap;
 
 final class AutoloaderFinder
 {
+    /**
+     * @var false|string|null
+     */
     private static $autoloader = false;
 
     private function __construct()
     {
     }
 
+    /**
+     * @return string|null
+     */
     public static function findAutoloader()
     {
         if (self::$autoloader === false) {
@@ -39,6 +45,12 @@ final class AutoloaderFinder
         return self::$autoloader;
     }
 
+    /**
+     * @param string|null $directory
+     * @param string      $partToAdd
+     *
+     * @return string|null
+     */
     private static function push($directory, $partToAdd)
     {
         if ($directory !== null) {
@@ -46,6 +58,12 @@ final class AutoloaderFinder
         }
     }
 
+    /**
+     * @param string|null $directory
+     * @param string      $partToCheck
+     *
+     * @return string|null
+     */
     private static function pop($directory, $partToCheck)
     {
         if ($directory !== null && basename($directory) == $partToCheck) {
@@ -53,6 +71,12 @@ final class AutoloaderFinder
         }
     }
 
+    /**
+     * @param string|null $directory
+     * @param string      $partToCheck
+     *
+     * @return string|null
+     */
     private static function check($directory, $partToCheck)
     {
         if ($directory !== null && basename($directory) == $partToCheck) {
