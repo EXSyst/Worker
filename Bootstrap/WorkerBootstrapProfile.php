@@ -2,13 +2,11 @@
 
 namespace EXSyst\Component\Worker\Bootstrap;
 
-use Symfony\Component\Process\PhpExecutableFinder;
-
 use EXSyst\Component\IO\Channel\ChannelFactoryInterface;
 use EXSyst\Component\IO\Channel\SerializedChannelFactory;
-
 use EXSyst\Component\Worker\Exception;
 use EXSyst\Component\Worker\Internal\WorkerRunner;
+use Symfony\Component\Process\PhpExecutableFinder;
 
 class WorkerBootstrapProfile
 {
@@ -108,6 +106,7 @@ class WorkerBootstrapProfile
     public function setPhpExecutablePath($phpExecutablePath)
     {
         $this->phpExecutablePath = $phpExecutablePath;
+
         return $this;
     }
 
@@ -127,6 +126,7 @@ class WorkerBootstrapProfile
     public function setPhpArguments(array $phpArguments = null)
     {
         $this->phpArguments = $phpArguments;
+
         return $this;
     }
 
@@ -141,6 +141,7 @@ class WorkerBootstrapProfile
             $this->phpArguments = [];
         }
         $this->phpArguments[] = $phpArgument;
+
         return $this;
     }
 
@@ -174,6 +175,7 @@ class WorkerBootstrapProfile
                 $phpArguments = $executableFinder->findArguments();
             }
         }
+
         return $this;
     }
 
@@ -185,6 +187,7 @@ class WorkerBootstrapProfile
     public function setStage1Parts(array $stage1Parts = [])
     {
         $this->stage1Parts = $stage1Parts;
+
         return $this;
     }
 
@@ -196,6 +199,7 @@ class WorkerBootstrapProfile
     public function addStage1Part($stage1Part)
     {
         $this->stage1Parts[] = $stage1Part;
+
         return $this;
     }
 
@@ -207,7 +211,7 @@ class WorkerBootstrapProfile
      */
     public function addStage1GlobalVariableWithExpression($name, $expr)
     {
-        return $this->addStage1Part('$' . $name . ' = ' . $expr . ';');
+        return $this->addStage1Part('$'.$name.' = '.$expr.';');
     }
 
     /**
@@ -237,6 +241,7 @@ class WorkerBootstrapProfile
     public function setScriptsToRequire(array $scriptsToRequire = [])
     {
         $this->scriptsToRequire = $scriptsToRequire;
+
         return $this;
     }
 
@@ -248,6 +253,7 @@ class WorkerBootstrapProfile
     public function addScriptToRequire($scriptToRequire)
     {
         $this->scriptsToRequire[] = $scriptToRequire;
+
         return $this;
     }
 
@@ -267,6 +273,7 @@ class WorkerBootstrapProfile
     public function setStage2Parts(array $stage2Parts = [])
     {
         $this->stage2Parts = $stage2Parts;
+
         return $this;
     }
 
@@ -278,6 +285,7 @@ class WorkerBootstrapProfile
     public function addStage2Part($stage2Part)
     {
         $this->stage2Parts[] = $stage2Part;
+
         return $this;
     }
 
@@ -289,7 +297,7 @@ class WorkerBootstrapProfile
      */
     public function addStage2GlobalVariableWithExpression($name, $expr)
     {
-        return $this->addStage2Part('$' . $name . ' = ' . $expr . ';');
+        return $this->addStage2Part('$'.$name.' = '.$expr.';');
     }
 
     /**
@@ -319,6 +327,7 @@ class WorkerBootstrapProfile
     public function setVariableName($variableName)
     {
         $this->variableName = $variableName;
+
         return $this;
     }
 
@@ -338,6 +347,7 @@ class WorkerBootstrapProfile
     public function setConstructorArguments(array $constructorArguments = [])
     {
         $this->constructorArguments = $constructorArguments;
+
         return $this;
     }
 
@@ -349,6 +359,7 @@ class WorkerBootstrapProfile
     public function addConstructorArgumentWithExpression($expression)
     {
         $this->constructorArguments[] = $expression;
+
         return $this;
     }
 
@@ -378,6 +389,7 @@ class WorkerBootstrapProfile
     public function setStage3Parts(array $stage3Parts = [])
     {
         $this->stage3Parts = $stage3Parts;
+
         return $this;
     }
 
@@ -389,6 +401,7 @@ class WorkerBootstrapProfile
     public function addStage3Part($stage3Part)
     {
         $this->stage3Parts[] = $stage3Part;
+
         return $this;
     }
 
@@ -400,7 +413,7 @@ class WorkerBootstrapProfile
      */
     public function addStage3GlobalVariableWithExpression($name, $expr)
     {
-        return $this->addStage3Part('$' . $name . ' = ' . $expr . ';');
+        return $this->addStage3Part('$'.$name.' = '.$expr.';');
     }
 
     /**
@@ -430,6 +443,7 @@ class WorkerBootstrapProfile
     public function setChannelFactory(ChannelFactoryInterface $channelFactory)
     {
         $this->channelFactory = $channelFactory;
+
         return $this;
     }
 
@@ -449,6 +463,7 @@ class WorkerBootstrapProfile
     public function setLoopExpression($loopExpression)
     {
         $this->loopExpression = $loopExpression;
+
         return $this;
     }
 
@@ -468,6 +483,7 @@ class WorkerBootstrapProfile
     public function setSocketContextExpression($socketContextExpression)
     {
         $this->socketContextExpression = $socketContextExpression;
+
         return $this;
     }
 
@@ -487,6 +503,7 @@ class WorkerBootstrapProfile
     public function setAdminCookie($adminCookie)
     {
         $this->adminCookie = $adminCookie;
+
         return $this;
     }
 
@@ -506,6 +523,7 @@ class WorkerBootstrapProfile
     public function setKillSwitchPath($killSwitchPath)
     {
         $this->killSwitchPath = $killSwitchPath;
+
         return $this;
     }
 
@@ -525,6 +543,7 @@ class WorkerBootstrapProfile
     public function setPrecompiledScripts(array $precompiledScripts)
     {
         $this->precompiledScripts = $precompiledScripts;
+
         return $this;
     }
 
@@ -551,6 +570,7 @@ class WorkerBootstrapProfile
     {
         $expression = self::combineExpressionWithSocketAddress($expression, $socketAddress);
         $this->precompiledScripts[$expression] = $scriptPath;
+
         return $this;
     }
 
@@ -582,6 +602,7 @@ class WorkerBootstrapProfile
     public function getPrecompiledScriptWithExpression($expression, $socketAddress = null)
     {
         $expression = self::combineExpressionWithSocketAddress($expression, $socketAddress);
+
         return isset($this->precompiledScripts[$expression]) ? $this->precompiledScripts[$expression] : null;
     }
 
@@ -623,6 +644,7 @@ class WorkerBootstrapProfile
                 file_put_contents($scriptPath, $this->generateScriptWithExpression($expression, $socketAddress));
             }
         }
+
         return $this;
     }
 
@@ -633,7 +655,7 @@ class WorkerBootstrapProfile
      */
     public function generateExpression($className)
     {
-        return 'new ' . $className . '(' . implode(', ', $this->constructorArguments) . ')';
+        return 'new '.$className.'('.implode(', ', $this->constructorArguments).')';
     }
 
     /**
@@ -645,7 +667,7 @@ class WorkerBootstrapProfile
     public static function combineExpressionWithSocketAddress($expression, $socketAddress = null)
     {
         if ($socketAddress !== null) {
-            $expression .= '/*' . $socketAddress . '*/';
+            $expression .= '/*'.$socketAddress.'*/';
         }
 
         return $expression;
@@ -670,30 +692,30 @@ class WorkerBootstrapProfile
      */
     public function generateScriptWithExpression($expression, $socketAddress = null)
     {
-        return '<?php' . PHP_EOL .
-            'set_time_limit(0);' . PHP_EOL .
-            (isset($this->precompiledScripts[$this->combineExpressionWithSocketAddress($expression, $socketAddress)]) ? '' : ('unlink(__FILE__);' . PHP_EOL)) .
+        return '<?php'.PHP_EOL.
+            'set_time_limit(0);'.PHP_EOL.
+            (isset($this->precompiledScripts[$this->combineExpressionWithSocketAddress($expression, $socketAddress)]) ? '' : ('unlink(__FILE__);'.PHP_EOL)).
             implode(array_map(function ($part) {
-                return $part . PHP_EOL;
-            }, array_filter($this->stage1Parts))) .
+                return $part.PHP_EOL;
+            }, array_filter($this->stage1Parts))).
             implode(array_map(function ($script) {
-                return 'require_once ' . self::exportPhpValue($script) . ';' . PHP_EOL;
-            }, array_filter($this->scriptsToRequire))) .
+                return 'require_once '.self::exportPhpValue($script).';'.PHP_EOL;
+            }, array_filter($this->scriptsToRequire))).
             implode(array_map(function ($part) {
-                return $part . PHP_EOL;
-            }, array_filter($this->stage2Parts))) .
-            '$' . $this->variableName . ' = ' . $expression . ';' . PHP_EOL .
+                return $part.PHP_EOL;
+            }, array_filter($this->stage2Parts))).
+            '$'.$this->variableName.' = '.$expression.';'.PHP_EOL.
             implode(array_map(function ($part) {
-                return $part . PHP_EOL;
-            }, array_filter($this->stage3Parts))) .
-            WorkerRunner::class . '::setChannelFactory(' . self::exportPhpValue($this->channelFactory) . ');' . PHP_EOL .
-            (($this->loopExpression !== null) ? (WorkerRunner::class . '::setLoop(' . $this->loopExpression . ');' . PHP_EOL) : '') .
-            (($this->socketContextExpression !== null) ? (WorkerRunner::class . '::setSocketContext(' . $this->socketContextExpression . ');' . PHP_EOL) : '') .
-            (($this->adminCookie !== null) ? (WorkerRunner::class . '::setAdminCookie(' . self::exportPhpValue($this->adminCookie) . ');' . PHP_EOL) : '') .
-            (($this->killSwitchPath !== null) ? (WorkerRunner::class . '::setKillSwitchPath(' . self::exportPhpValue($this->killSwitchPath) . ');' . PHP_EOL) : '') .
+                return $part.PHP_EOL;
+            }, array_filter($this->stage3Parts))).
+            WorkerRunner::class.'::setChannelFactory('.self::exportPhpValue($this->channelFactory).');'.PHP_EOL.
+            (($this->loopExpression !== null) ? (WorkerRunner::class.'::setLoop('.$this->loopExpression.');'.PHP_EOL) : '').
+            (($this->socketContextExpression !== null) ? (WorkerRunner::class.'::setSocketContext('.$this->socketContextExpression.');'.PHP_EOL) : '').
+            (($this->adminCookie !== null) ? (WorkerRunner::class.'::setAdminCookie('.self::exportPhpValue($this->adminCookie).');'.PHP_EOL) : '').
+            (($this->killSwitchPath !== null) ? (WorkerRunner::class.'::setKillSwitchPath('.self::exportPhpValue($this->killSwitchPath).');'.PHP_EOL) : '').
             (($socketAddress === null)
-                ? (WorkerRunner::class . '::runDedicatedWorker($' . $this->variableName . ');')
-                : (WorkerRunner::class . '::runSharedWorker($' . $this->variableName . ', ' . self::exportPhpValue($socketAddress) . ');'));
+                ? (WorkerRunner::class.'::runDedicatedWorker($'.$this->variableName.');')
+                : (WorkerRunner::class.'::runSharedWorker($'.$this->variableName.', '.self::exportPhpValue($socketAddress).');'));
     }
 
     /**
@@ -704,14 +726,14 @@ class WorkerBootstrapProfile
     public static function exportPhpValue($value)
     {
         switch (gettype($value)) {
-            case "boolean":
-            case "integer":
-            case "double":
-            case "string":
-            case "NULL":
+            case 'boolean':
+            case 'integer':
+            case 'double':
+            case 'string':
+            case 'NULL':
                 return var_export($value, true);
             default:
-                return 'unserialize(' . var_export(serialize($value), true) . ')';
+                return 'unserialize('.var_export(serialize($value), true).')';
         }
     }
 }

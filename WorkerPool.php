@@ -4,15 +4,10 @@ namespace EXSyst\Component\Worker;
 
 use ArrayAccess;
 use Countable;
-use IteratorAggregate;
-
-use Symfony\Component\Process\ExecutableFinder;
-
 use EXSyst\Component\IO\Selectable;
-
 use EXSyst\Component\Worker\Bootstrap\WorkerBootstrapProfile;
-
-use EXSyst\Component\Worker\Exception;
+use IteratorAggregate;
+use Symfony\Component\Process\ExecutableFinder;
 
 class WorkerPool implements ArrayAccess, Countable, IteratorAggregate
 {
@@ -33,7 +28,7 @@ class WorkerPool implements ArrayAccess, Countable, IteratorAggregate
     {
         $workerCount = ($workerCount === null) ? self::getProcessorCount() : intval($workerCount);
         if ($workerCount <= 0) {
-            throw new Exception\InvalidArgumentException("The worker count must be a strictly positive number !");
+            throw new Exception\InvalidArgumentException('The worker count must be a strictly positive number !');
         }
         $this->workers = [];
         while ($workerCount-- > 0) {
@@ -79,6 +74,7 @@ class WorkerPool implements ArrayAccess, Countable, IteratorAggregate
     public static function getProcessorCount()
     {
         $getconfPath = self::findGetconf();
+
         return intval(trim(shell_exec(escapeshellarg($getconfPath).' _NPROCESSORS_ONLN')));
     }
 
@@ -126,7 +122,7 @@ class WorkerPool implements ArrayAccess, Countable, IteratorAggregate
      */
     public function offsetSet($offset, $value)
     {
-        throw new Exception\LogicException("A WorkerPool is a read-only container");
+        throw new Exception\LogicException('A WorkerPool is a read-only container');
     }
 
     /**
@@ -136,7 +132,7 @@ class WorkerPool implements ArrayAccess, Countable, IteratorAggregate
      */
     public function offsetUnset($offset)
     {
-        throw new Exception\LogicException("A WorkerPool is a read-only container");
+        throw new Exception\LogicException('A WorkerPool is a read-only container');
     }
 
     /**
@@ -169,9 +165,10 @@ class WorkerPool implements ArrayAccess, Countable, IteratorAggregate
         $workers = $this->workers;
         Selectable::selectRead($workers, null);
         if (!count($workers)) {
-            throw new Exception\RuntimeException("selectRead returned an empty array (this should not happen)");
+            throw new Exception\RuntimeException('selectRead returned an empty array (this should not happen)');
         }
         $worker = reset($workers);
+
         return $worker->receiveMessage();
     }
 
