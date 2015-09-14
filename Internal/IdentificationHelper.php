@@ -68,7 +68,6 @@ final class IdentificationHelper
         if (!self::isLocalAddress($socketAddress)) {
             return;
         }
-        $finder = new ExecutableFinder();
         $lsofPath = self::findLsof();
         $unix = self::isUnixAddress($socketAddress);
         $lsofArgs = self::buildLsofArgs($socketAddress, $unix);
@@ -85,6 +84,7 @@ final class IdentificationHelper
 
     private static function findLsof()
     {
+        $finder = new ExecutableFinder();
         $lsofPath = $finder->find('lsof', null, ['/sbin', '/usr/sbin']);
         if ($lsofPath === null) {
             throw new Exception\RuntimeException('Unable to find the LSOF executable.');
