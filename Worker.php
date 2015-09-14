@@ -2,9 +2,9 @@
 
 namespace EXSyst\Component\Worker;
 
-use EXSyst\Component\IO\Source;
-use EXSyst\Component\IO\Sink;
 use EXSyst\Component\IO\Channel\ChannelInterface;
+use EXSyst\Component\IO\Sink;
+use EXSyst\Component\IO\Source;
 use EXSyst\Component\Worker\Bootstrap\WorkerBootstrapProfile;
 
 class Worker implements ChannelInterface

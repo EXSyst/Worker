@@ -53,7 +53,7 @@ class WorkerStatus
     {
         return [
             'textStatus' => $this->textStatus,
-            'counters' => array_map(function (WorkerCounter $counter) {
+            'counters'   => array_map(function (WorkerCounter $counter) {
                 return $counter->toArray();
             }),
         ];

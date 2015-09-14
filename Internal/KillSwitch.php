@@ -2,8 +2,8 @@
 
 namespace EXSyst\Component\Worker\Internal;
 
-use stdClass;
 use EXSyst\Component\Worker\Exception;
+use stdClass;
 
 class KillSwitch
 {
