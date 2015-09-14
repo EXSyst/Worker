@@ -44,7 +44,7 @@ final class WorkerRunner
      */
     private static $socket;
     /**
-     * @var boolean
+     * @var bool
      */
     private static $listening;
     /**
@@ -86,6 +86,7 @@ final class WorkerRunner
         if (self::$loop === null) {
             self::$loop = Factory::create();
         }
+
         return self::$loop;
     }
 
@@ -99,6 +100,7 @@ final class WorkerRunner
         if (self::$channelFactory === null) {
             self::$channelFactory = SerializedChannelFactory::getInstance();
         }
+
         return self::$channelFactory;
     }
 
@@ -128,6 +130,7 @@ final class WorkerRunner
                 } catch (IOException\UnderflowException $e) {
                     Selectable::unregisterRead($loop, $channel);
                     $workerImpl->onDisconnect($channel);
+
                     return;
                 }
                 $workerImpl->onMessage($message, $channel, null);
@@ -158,6 +161,7 @@ final class WorkerRunner
                     } catch (IOException\UnderflowException $e) {
                         Selectable::unregisterRead($loop, $channel);
                         $workerImpl->onDisconnect($channel);
+
                         return;
                     }
                     if (AdminEncoding::isStopMessage($message, self::$adminCookie, $privileged)) {
@@ -192,7 +196,7 @@ final class WorkerRunner
         if (self::$killSwitchPath !== null) {
             $kswitch = new KillSwitch(self::$killSwitchPath);
             if ($kswitch->getGlobal() || $kswitch->hasAddress($socketAddress)) {
-                throw new Exception\RuntimeException("This worker has been prevented from starting using the kill switch");
+                throw new Exception\RuntimeException('This worker has been prevented from starting using the kill switch');
             }
         }
         $socketFile = IdentificationHelper::getSocketFile($socketAddress);

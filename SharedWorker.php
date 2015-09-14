@@ -2,9 +2,9 @@
 
 namespace EXSyst\Component\Worker;
 
+use EXSyst\Component\IO\Channel\ChannelInterface;
 use EXSyst\Component\IO\Source;
 use EXSyst\Component\IO\Source\BufferedSource;
-use EXSyst\Component\IO\Channel\ChannelInterface;
 use EXSyst\Component\Worker\Bootstrap\WorkerBootstrapProfile;
 use EXSyst\Component\Worker\Internal\AdminEncoding;
 use EXSyst\Component\Worker\Internal\IdentificationHelper;

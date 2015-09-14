@@ -2,8 +2,8 @@
 
 namespace EXSyst\Component\Worker\Internal;
 
-use Symfony\Component\Process\ExecutableFinder;
 use EXSyst\Component\Worker\Exception;
+use Symfony\Component\Process\ExecutableFinder;
 
 final class IdentificationHelper
 {
