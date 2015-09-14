@@ -11,7 +11,7 @@
     "minimum-stability": "dev",
     "require": {
         "php": ">=5.5",
-        "exsyst/io": "dev-master",
+        "exsyst/io": ">=0.1 <0.2",
         "symfony/process": "~2.3|~3.0"
     },
     "require-dev": {
@@ -25,6 +25,11 @@
     "autoload": {
         "psr-4": {
             "EXSyst\\Component\\Worker\\": ""
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "0.1.x-dev"
         }
     }
 }
