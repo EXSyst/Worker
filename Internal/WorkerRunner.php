@@ -162,8 +162,10 @@ final class WorkerRunner
                     }
                     if (AdminEncoding::isStopMessage($message, self::$adminCookie, $privileged)) {
                         if ($privileged) {
+                            $lock = Lock::acquire();
                             self::stopListening();
                             $workerImpl->onStop();
+                            $lock->release();
                         }
                     } elseif (AdminEncoding::isQueryMessage($message, self::$adminCookie, $privileged)) {
                         $result = $workerImpl->onQuery($privileged);
