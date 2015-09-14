@@ -87,11 +87,11 @@ class WorkerCounter
     public function toArray()
     {
         return [
-            'name' => $this->name,
+            'name'  => $this->name,
             'value' => $this->value,
-            'unit' => $this->unit,
-            'min' => $this->min,
-            'max' => $this->max,
+            'unit'  => $this->unit,
+            'min'   => $this->min,
+            'max'   => $this->max,
         ];
     }
 

@@ -2,10 +2,10 @@
 
 namespace EXSyst\Component\Worker;
 
-use Traversable;
 use EXSyst\Component\Worker\Bootstrap\WorkerBootstrapProfile;
 use EXSyst\Component\Worker\Internal\KillSwitch;
 use EXSyst\Component\Worker\Internal\Lock;
+use Traversable;
 
 class WorkerFactory
 {

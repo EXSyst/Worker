@@ -2,10 +2,10 @@
 
 namespace EXSyst\Component\Worker\Internal;
 
-use stdClass;
 use EXSyst\Component\IO\Channel\ChannelInterface;
 use EXSyst\Component\IO\Channel\SerializedChannel;
 use EXSyst\Component\Worker\Status\WorkerStatus;
+use stdClass;
 
 final class AdminEncoding
 {
