@@ -73,4 +73,66 @@ class WorkerCounter
                 isset($arrayOrObject->max) ? $arrayOrObject->max : null);
         }
     }
+
+    public static function getSystemCounters()
+    {
+        return [
+            self::getWallExecutionTimeCounter(),
+            self::getMemoryUsageCounter(),
+        ];
+    }
+
+    public static function getWallExecutionTimeCounter()
+    {
+        try {
+            $start = isset($_SERVER['REQUEST_TIME_FLOAT']) ? $_SERVER['REQUEST_TIME_FLOAT'] : null;
+        } catch (\Exception $e) {
+            $start = null;
+        }
+
+        return new self('sys_wall_execution_time', ($start === null) ? null : (microtime(true) - $start), 's', 0);
+    }
+
+    public static function getMemoryUsageCounter()
+    {
+        return new self('sys_memory_usage', memory_get_usage(), 'B', 0, self::getMemoryLimit());
+    }
+
+    private static function getMemoryLimit()
+    {
+        $limit = self::parseIniSize(ini_get('memory_limit'));
+        if ($limit < 0) {
+            return;
+        } else {
+            return $limit;
+        }
+    }
+
+    private static function parseIniSize($size)
+    {
+        $iSize = intval($size);
+        if ($iSize == 0) {
+            return 0;
+        }
+        $size = trim($size);
+
+        return $iSize * self::getSuffixMultiplier($size[strlen($size) - 1]);
+    }
+
+    private static function getSuffixMultiplier($suffix)
+    {
+        switch ($suffix) {
+            case 'G':
+            case 'g':
+                return 1073741824;
+            case 'M':
+            case 'm':
+                return 1048576;
+            case 'K':
+            case 'k':
+                return 1024;
+            default:
+                return 1;
+        }
+    }
 }
