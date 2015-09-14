@@ -87,7 +87,7 @@ final class IdentificationHelper
         $finder = new ExecutableFinder();
         $lsofPath = $finder->find('lsof', null, ['/sbin', '/usr/sbin']);
         if ($lsofPath === null) {
-            throw new Exception\RuntimeException('Unable to find the LSOF executable.');
+            throw new Exception\RuntimeException('Unable to find the "lsof" executable.');
         }
 
         return $lsofPath;

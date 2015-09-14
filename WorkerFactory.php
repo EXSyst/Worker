@@ -31,12 +31,12 @@ class WorkerFactory
         return Worker::withExpression($this->bootstrapProfile, $implementationExpression);
     }
 
-    public function createWorkerPool($implementationClassName, $workerCount)
+    public function createWorkerPool($implementationClassName, $workerCount = null)
     {
         return WorkerPool::withClass($this->bootstrapProfile, $implementationClassName, $workerCount);
     }
 
-    public function createWorkerPoolWithExpression($implementationExpression, $workerCount)
+    public function createWorkerPoolWithExpression($implementationExpression, $workerCount = null)
     {
         return WorkerPool::withExpression($this->bootstrapProfile, $implementationExpression, $workerCount);
     }

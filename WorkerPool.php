@@ -6,6 +6,8 @@ use ArrayAccess;
 use Countable;
 use IteratorAggregate;
 
+use Symfony\Component\Process\ExecutableFinder;
+
 use EXSyst\Component\IO\Selectable;
 
 use EXSyst\Component\Worker\Bootstrap\WorkerBootstrapProfile;
@@ -16,9 +18,9 @@ class WorkerPool implements ArrayAccess, Countable, IteratorAggregate
 {
     private $workers;
 
-    protected function __construct(WorkerBootstrapProfile $bootstrapProfile, $implementationExpression, $workerCount)
+    protected function __construct(WorkerBootstrapProfile $bootstrapProfile, $implementationExpression, $workerCount = null)
     {
-        $workerCount = intval($workerCount);
+        $workerCount = ($workerCount === null) ? self::getProcessorCount() : intval($workerCount);
         if ($workerCount <= 0) {
             throw new Exception\InvalidArgumentException("The worker count must be a strictly positive number !");
         }
@@ -28,14 +30,31 @@ class WorkerPool implements ArrayAccess, Countable, IteratorAggregate
         }
     }
 
-    public static function withClass(WorkerBootstrapProfile $bootstrapProfile, $implementationClassName, $workerCount)
+    public static function withClass(WorkerBootstrapProfile $bootstrapProfile, $implementationClassName, $workerCount = null)
     {
         return new static($bootstrapProfile, $bootstrapProfile->generateExpression($implementationClassName), $workerCount);
     }
 
-    public static function withExpression(WorkerBootstrapProfile $bootstrapProfile, $implementationExpression, $workerCount)
+    public static function withExpression(WorkerBootstrapProfile $bootstrapProfile, $implementationExpression, $workerCount = null)
     {
         return new static($bootstrapProfile, $implementationExpression, $workerCount);
+    }
+
+    public static function getProcessorCount()
+    {
+        $getconfPath = self::findGetconf();
+        return intval(trim(shell_exec(escapeshellarg($getconfPath).' _NPROCESSORS_ONLN')));
+    }
+
+    private static function findGetconf()
+    {
+        $finder = new ExecutableFinder();
+        $getconfPath = $finder->find('getconf');
+        if ($getconfPath === null) {
+            throw new Exception\RuntimeException('Unable to find the "getconf" executable.');
+        }
+
+        return $getconfPath;
     }
 
     public function offsetExists($offset)
