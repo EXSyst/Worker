@@ -257,7 +257,7 @@ class SharedWorker implements ChannelInterface
      * @throws Exception\LogicException
      * @throws Exception\RuntimeException
      *
-     * @return bool
+     * @return $this
      */
     public function stop()
     {
