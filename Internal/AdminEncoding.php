@@ -59,21 +59,31 @@ final class AdminEncoding
             return WorkerStatus::fromArrayOrObject($message->_status_);
         } elseif (is_array($message) && isset($message['_status_'])) {
             return WorkerStatus::fromArrayOrObject($message['_status_']);
-        } else {
-            return;
         }
     }
 
+    /**
+     * @param ChannelInterface $channel
+     * @param string $adminCookie
+     */
     public static function sendStopMessage(ChannelInterface $channel, $adminCookie)
     {
         $channel->sendMessage(($channel instanceof SerializedChannel) ? new StopMessage($adminCookie) : ['_stop_' => $adminCookie]);
     }
 
+    /**
+     * @param ChannelInterface $channel
+     * @param string $adminCookie
+     */
     public static function sendQueryMessage(ChannelInterface $channel, $adminCookie)
     {
         $channel->sendMessage(($channel instanceof SerializedChannel) ? new QueryMessage($adminCookie) : ['_query_' => $adminCookie]);
     }
 
+    /**
+     * @param ChannelInterface $channel
+     * @param WorkerStatus $result
+     */
     public static function sendStatusMessage(ChannelInterface $channel, WorkerStatus $result)
     {
         $channel->sendMessage(($channel instanceof SerializedChannel) ? $result : ['_status_' => $result->toArray()]);
