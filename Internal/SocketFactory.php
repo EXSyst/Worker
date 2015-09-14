@@ -31,7 +31,7 @@ final class SocketFactory
         try {
             return self::doCreateServerSocket($socketAddress, $socketContext);
         } catch (Exception\BindOrListenException $e) {
-            if (strpos($e->getMessage(), 'Address already in use') !== false && ($socketFile = IdentificationHelper::getSocketFile($socketAddress)) !== null) {
+            if (($socketFile = IdentificationHelper::getSocketFile($socketAddress)) !== null) {
                 try {
                     fclose(self::createClientSocket($socketAddress, 1, $socketContext));
                     // Really in use
