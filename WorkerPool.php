@@ -115,6 +115,8 @@ class WorkerPool implements ArrayAccess, Countable, IteratorAggregate
                 Selectable::registerRead($loop, $worker, $listener);
             }
         }
+
+        return $this;
     }
 
     public function unregisterRead(LoopInterface $loop)
@@ -122,5 +124,7 @@ class WorkerPool implements ArrayAccess, Countable, IteratorAggregate
         foreach ($this->workers as $worker) {
             Selectable::unregisterRead($loop, $worker);
         }
+
+        return $this;
     }
 }
