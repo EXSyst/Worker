@@ -2,7 +2,6 @@
 
 namespace EXSyst\Component\Worker\Internal;
 
-use stdClass;
 use EXSyst\Component\IO\Channel\ChannelFactoryInterface;
 use EXSyst\Component\IO\Channel\SerializedChannelFactory;
 use EXSyst\Component\IO\Exception as IOException;

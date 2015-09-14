@@ -2,6 +2,9 @@
 
 namespace EXSyst\Component\Worker\Internal;
 
+use Symfony\Component\Process\ExecutableFinder;
+use EXSyst\Component\Worker\Exception;
+
 final class IdentificationHelper
 {
     private function __construct()
@@ -65,10 +68,11 @@ final class IdentificationHelper
         if (!self::isLocalAddress($socketAddress)) {
             return;
         }
+        $finder = new ExecutableFinder();
+        $lsofPath = self::findLsof();
         $unix = self::isUnixAddress($socketAddress);
-        $schemeless = self::stripScheme($socketAddress);
-        $lsofArgs = $unix ? ('-F p0 '.escapeshellarg($schemeless)) : ('-F pT0 -i tcp@'.escapeshellarg($schemeless));
-        exec('lsof '.$lsofArgs, $output, $exitCode);
+        $lsofArgs = self::buildLsofArgs($socketAddress, $unix);
+        exec(escapeshellarg($lsofPath).' '.$lsofArgs.' 2>/dev/null', $output, $exitCode);
         if ($exitCode !== 0 || $output === null) {
             return;
         }
@@ -79,7 +83,24 @@ final class IdentificationHelper
         }
     }
 
-    private static function findProcessIdFromLsofOutput($output)
+    private static function findLsof()
+    {
+        $lsofPath = $finder->find('lsof', null, ['/sbin', '/usr/sbin']);
+        if ($lsofPath === null) {
+            throw new Exception\RuntimeException('Unable to find the LSOF executable.');
+        }
+
+        return $lsofPath;
+    }
+
+    private static function buildLsofArgs($socketAddress, $unix)
+    {
+        $schemeless = self::stripScheme($socketAddress);
+
+        return $unix ? ('-F p0 '.escapeshellarg($schemeless)) : ('-F pT0 -i tcp@'.escapeshellarg($schemeless));
+    }
+
+    private static function findProcessIdFromLsofOutput(array $output)
     {
         foreach ($output as $line) {
             if (substr_compare($line, 'p', 0, 1) === 0) {
@@ -88,7 +109,7 @@ final class IdentificationHelper
         }
     }
 
-    private static function findListeningProcessIdFromLsofOutput($output)
+    private static function findListeningProcessIdFromLsofOutput(array $output)
     {
         $pid = null;
         foreach ($output as $line) {

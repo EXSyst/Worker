@@ -7,6 +7,7 @@ use Symfony\Component\Process\PhpExecutableFinder;
 use EXSyst\Component\IO\Channel\ChannelFactoryInterface;
 use EXSyst\Component\IO\Channel\SerializedChannelFactory;
 
+use EXSyst\Component\Worker\Exception;
 use EXSyst\Component\Worker\Internal\WorkerRunner;
 
 class WorkerBootstrapProfile

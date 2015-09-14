@@ -2,6 +2,8 @@
 
 namespace EXSyst\Component\Worker\Status;
 
+use EXSyst\Component\Worker\Exception;
+
 class WorkerStatus
 {
     private $textStatus;
