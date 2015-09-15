@@ -226,6 +226,7 @@ Please note that disabling shared workers will not automatically stop them (and 
 ## The bootstrap profile
 This object contains all the parameters needed to initialize a worker. The library is designed to try and provide default values for mandatory parameters :
 - The ```php``` or ```hhvm``` executable's path and arguments (by default, will be auto-detected using [```symfony/process```](https://github.com/symfony/Process)) ;
+- The preferred identity, which is a system user on behalf of which the workers will prefer to run : if they are started as ```root``` (or with ```CAP_SETUID``` on Linux), they will ```setuid``` to this user (by default, none) ;
 - The "stage 1" parts, which are to be executed before ```require```ing any scripts (by default, none) ;
 - The scripts to ```require``` (by default, the component will try to find ```composer```'s autoloader, unless told not to) ;
 - The "stage 2" parts, which are to be executed after ```require```ing the scripts, but before creating the worker implementation (by default, none) ;
