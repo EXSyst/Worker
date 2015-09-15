@@ -19,6 +19,10 @@ class WorkerBootstrapProfile
      */
     private $phpArguments;
     /**
+     * @var string|null
+     */
+    private $preferredIdentity;
+    /**
      * @var array
      */
     private $stage1Parts;
@@ -74,6 +78,7 @@ class WorkerBootstrapProfile
     {
         $this->phpExecutablePath = null;
         $this->phpArguments = null;
+        $this->preferredIdentity = null;
         $this->stage1Parts = [];
         $this->scriptsToRequire = $withAutoloader ? [AutoloaderFinder::findAutoloader()] : [];
         $this->stage2Parts = [];
@@ -177,6 +182,26 @@ class WorkerBootstrapProfile
         }
 
         return $this;
+    }
+
+    /**
+     * @param string|null $preferredIdentity
+     *
+     * @return $this
+     */
+    public function setPreferredIdentity($preferredIdentity)
+    {
+        $this->preferredIdentity = $preferredIdentity;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPreferredIdentity()
+    {
+        return $this->preferredIdentity;
     }
 
     /**
@@ -688,6 +713,8 @@ class WorkerBootstrapProfile
      * @param string      $expression
      * @param string|null $socketAddress
      *
+     * @throws Exception\LogicException
+     *
      * @return string
      */
     public function generateScriptWithExpression($expression, $socketAddress = null)
@@ -695,6 +722,7 @@ class WorkerBootstrapProfile
         return '<?php'.PHP_EOL.
             'set_time_limit(0);'.PHP_EOL.
             (isset($this->precompiledScripts[$this->combineExpressionWithSocketAddress($expression, $socketAddress)]) ? '' : ('unlink(__FILE__);'.PHP_EOL)).
+            $this->generatePartForPreferredIdentity().
             implode(array_map(function ($part) {
                 return $part.PHP_EOL;
             }, array_filter($this->stage1Parts))).
@@ -716,6 +744,29 @@ class WorkerBootstrapProfile
             (($socketAddress === null)
                 ? (WorkerRunner::class.'::runDedicatedWorker($'.$this->variableName.');')
                 : (WorkerRunner::class.'::runSharedWorker($'.$this->variableName.', '.self::exportPhpValue($socketAddress).');'));
+    }
+
+    /**
+     * @throws Exception\LogicException
+     *
+     * @return string
+     */
+    private function generatePartForPreferredIdentity()
+    {
+        if ($this->preferredIdentity === null) {
+            return '';
+        }
+        if (!function_exists('posix_getpwnam')) {
+            throw new Exception\LogicException('The POSIX extension must be installed to be able to set a preferred identity');
+        }
+        $pw = posix_getpwnam($this->preferredIdentity);
+        if ($pw === false) {
+            throw new Exception\LogicException('The preferred identity is one of a non-existent user');
+        }
+
+        return 'posix_setgid('.self::exportPhpValue($pw['gid']).');'.PHP_EOL.
+            'posix_initgroups('.self::exportPhpValue($pw['name']).', '.self::exportPhpValue($pw['gid']).');'.PHP_EOL.
+            'posix_setuid('.self::exportPhpValue($pw['uid']).');'.PHP_EOL;
     }
 
     /**
