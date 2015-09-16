@@ -7,6 +7,7 @@ use Countable;
 use EXSyst\Component\IO\Selectable;
 use EXSyst\Component\Worker\Bootstrap\WorkerBootstrapProfile;
 use IteratorAggregate;
+use React\EventLoop\LoopInterface;
 use Symfony\Component\Process\ExecutableFinder;
 
 class WorkerPool implements ArrayAccess, Countable, IteratorAggregate
