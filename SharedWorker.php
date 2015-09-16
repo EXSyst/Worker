@@ -168,13 +168,18 @@ class SharedWorker implements ChannelInterface
 
     /**
      * @param array $argv
+     *
+     * @throws Exception\RuntimeException
      */
     public static function startDaemon(array $argv)
     {
-        $command = escapeshellarg(implode(' ', array_map('escapeshellarg', $argv)));
-        // This command purges the file descriptors of the daemon which it starts.
-        // Caveat : it may contain "Bashisms".
-        system('PID="$$"; OF="$(lsof -p "$PID" -F f)"; eval '.$command.'\ 0\</dev/null\ 1\>/dev/null\ 2\>/dev/null"$(grep \^f\[0-9\] <<< "$OF" | grep -v \^f\[012\]\$ | cut -c2- | while read; do printf \ $REPLY\>\&-; done; printf \ \&)"');
+        // This part purges the file descriptors of the daemon.
+        // Caveat : it may contain "Bashisms", for example if a FD is >= 10.
+        $fdPurge = implode(array_map(function ($fd) {
+            return ' '.escapeshellarg($fd).'>&-';
+        }, IdentificationHelper::getMyFileDescriptors(false)));
+        $command = implode(' ', array_map('escapeshellarg', $argv));
+        system($command.' 0</dev/null 1>/dev/null 2>&1'.$fdPurge.' &');
     }
 
     /**

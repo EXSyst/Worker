@@ -115,6 +115,35 @@ final class IdentificationHelper
     }
 
     /**
+     * @param bool $includeStdIO
+     *
+     * @throws Exception\RuntimeException
+     *
+     * @return array
+     */
+    public static function getMyFileDescriptors($includeStdIO = true)
+    {
+        $lsofPath = self::findLsof();
+        exec(escapeshellarg($lsofPath).' -F f -p '.getmypid(), $output, $exitCode);
+        if ($exitCode !== 0 || $output === null) {
+            return [];
+        }
+        $output = array_map('trim', $output);
+        $output = array_values(array_filter($output, function ($line) {
+            return preg_match('#^f\\d+$#', $line);
+        }));
+        $fds = array_map(function ($line) {
+            return intval(substr($line, 1));
+        }, $output);
+        sort($fds);
+        if (!$includeStdIO) {
+            $fds = self::removeStdIO($fds);
+        }
+
+        return $fds;
+    }
+
+    /**
      * @throws Exception\RuntimeException
      *
      * @return string
@@ -174,5 +203,21 @@ final class IdentificationHelper
                 return $pid;
             }
         }
+    }
+
+    /**
+     * @param array $fds
+     *
+     * @return array
+     */
+    private static function removeStdIO(array $fds)
+    {
+        foreach ($fds as $i => $fd) {
+            if ($fd > 2) {
+                return array_slice($fds, $i);
+            }
+        }
+
+        return $fds;
     }
 }
