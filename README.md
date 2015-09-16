@@ -5,7 +5,7 @@
 Worker subprocess management
 
 ## Operating system compatibility
-This library uses Unix-specific utilities, such as ```lsof``` (for finding the process ID of a shared worker) and ```getconf``` (for querying the processor count, if you use the automatic worker pool sizing). If you use these features, please ensure that these programs are installed and executable by PHP.
+This library uses Unix-specific utilities, such as ```lsof``` (for finding the process ID of a shared worker, and purging the file descriptors of a shared worker) and ```getconf``` (for querying the processor count, if you use the automatic worker pool sizing). If you use these features, please ensure that these programs are installed and executable by PHP.
 
 This library is **unsupported on Windows**.
 

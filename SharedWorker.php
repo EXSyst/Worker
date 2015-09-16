@@ -157,13 +157,24 @@ class SharedWorker implements ChannelInterface
 
         try {
             $line = array_merge([$php], $phpArgs, [$scriptPath]);
-            system(implode(' ', array_map('escapeshellarg', $line)).' </dev/null >/dev/null 2>&1 &');
+            self::startDaemon($line);
         } catch (\Exception $e) {
             if ($deleteScript) {
                 unlink($scriptPath);
             }
             throw $e;
         }
+    }
+
+    /**
+     * @param array $argv
+     */
+    public static function startDaemon(array $argv)
+    {
+        $command = escapeshellarg(implode(' ', array_map('escapeshellarg', $argv)));
+        // This command purges the file descriptors of the daemon which it starts.
+        // Caveat : it may contain "Bashisms".
+        system('PID="$$"; OF="$(lsof -p "$PID" -F f)"; eval '.$command.'\ 0\</dev/null\ 1\>/dev/null\ 2\>/dev/null"$(grep \^f\[0-9\] <<< "$OF" | grep -v \^f\[012\]\$ | cut -c2- | while read; do printf \ $REPLY\>\&-; done; printf \ \&)"');
     }
 
     /**
