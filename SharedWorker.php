@@ -176,7 +176,7 @@ class SharedWorker implements ChannelInterface
         // This part purges the file descriptors of the daemon.
         // Caveat : it may contain "Bashisms", for example if a FD is >= 10.
         $fdPurge = implode(array_map(function ($fd) {
-            return ' '.escapeshellarg($fd).'>&-';
+            return ' '.intval($fd).'>&-';
         }, IdentificationHelper::getMyFileDescriptors(false)));
         $command = implode(' ', array_map('escapeshellarg', $argv));
         system($command.' 0</dev/null 1>/dev/null 2>&1'.$fdPurge.' &');
