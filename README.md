@@ -241,3 +241,9 @@ This object contains all the parameters needed to initialize a worker. The libra
 - The precompiled script map, which allows reusing the same script for every worker which uses the same implementation, instead of using a "generate in ```/tmp```, run once, then delete" approach (by default, none).
 
 If you don't specify a bootstrap profile when creating your worker factory, it will automatically create one, with the default values of all parameters.
+
+# Contribute
+If you want to contribute to this package, please post an issue or make a PR.
+
+We use ```php-cs-fixer``` to respect PHP standards with this options: <br />
+```php-cs-fixer fix . --level=symfony --fixers=align_double_arrow```
