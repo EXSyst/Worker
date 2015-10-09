@@ -1,6 +1,6 @@
 <?php
 
-namespace EXSyst\Component\IO\Exception;
+namespace EXSyst\Component\Worker\Exception;
 
 /**
  * Error Exception.
