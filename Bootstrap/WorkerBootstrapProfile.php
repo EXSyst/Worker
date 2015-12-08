@@ -74,6 +74,10 @@ class WorkerBootstrapProfile
     /**
      * @var string|null
      */
+    private $outputPath;
+    /**
+     * @var string|null
+     */
     private $killSwitchPath;
     /**
      * @var array
@@ -98,6 +102,7 @@ class WorkerBootstrapProfile
         $this->loopExpression = null;
         $this->socketContextExpression = null;
         $this->adminCookie = null;
+        $this->outputPath = null;
         $this->killSwitchPath = null;
         $this->precompiledScripts = [];
     }
@@ -547,6 +552,26 @@ class WorkerBootstrapProfile
     public function getAdminCookie()
     {
         return $this->adminCookie;
+    }
+
+    /**
+     * @param string|null
+     *
+     * @return $this
+     */
+    public function setOutputPath($outputPath)
+    {
+        $this->outputPath = $outputPath;
+
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getOutputPath()
+    {
+        return $this->outputPath;
     }
 
     /**

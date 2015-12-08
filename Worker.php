@@ -38,10 +38,11 @@ class Worker implements ChannelInterface
 
         try {
             $line = array_merge([$php], $phpArgs, [$scriptPath]);
+            $outPath = $bootstrapProfile->getOutputPath();
             $this->process = proc_open(implode(' ', array_map('escapeshellarg', $line)), [
                 0 => ['pipe', 'r'],
                 1 => ['pipe', 'w'],
-                2 => STDERR,
+                2 => ($outPath !== null) ? ['file', $outPath, 'a'] : STDERR,
             ], $pipes);
             $inputSink = Sink::fromStream($pipes[0], true);
             $outputSource = Source::fromStream($pipes[1], true);

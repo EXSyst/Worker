@@ -166,7 +166,7 @@ class SharedWorker implements ChannelInterface
 
         try {
             $line = array_merge([$php], $phpArgs, [$scriptPath]);
-            self::startDaemon($line);
+            self::startDaemon($line, $bootstrapProfile->getOutputPath());
         } catch (\Exception $e) {
             if ($deleteScript) {
                 unlink($scriptPath);
@@ -177,10 +177,11 @@ class SharedWorker implements ChannelInterface
 
     /**
      * @param array $argv
+     * @param string|null $outputPath
      *
      * @throws Exception\RuntimeException
      */
-    public static function startDaemon(array $argv)
+    public static function startDaemon(array $argv, $outputPath = null)
     {
         // This part purges the file descriptors of the daemon.
         // Caveat : it may contain "Bashisms", for example if a FD is >= 10.
@@ -188,7 +189,7 @@ class SharedWorker implements ChannelInterface
             return ' '.intval($fd).'>&-';
         }, IdentificationHelper::getMyFileDescriptors(false)));
         $command = implode(' ', array_map('escapeshellarg', $argv));
-        system($command.' 0</dev/null 1>/dev/null 2>&1'.$fdPurge.' &');
+        system($command.' 0</dev/null 1'.(($outputPath !== null) ? ('>>'.escapeshellarg($outputPath)) : '>/dev/null').' 2>&1'.$fdPurge.' &');
     }
 
     /**
